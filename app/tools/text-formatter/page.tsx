@@ -4,14 +4,13 @@ import { TextFormatter } from "../../components/TextFormatter";
 export default function TextFormatterPage() {
   return (
     <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-      <section className="subpage-hero">
+      <section className="subpage-hero compact-hero">
         <SiteHeader />
         <div className="subpage-heading">
           <p className="eyebrow">LinkedIn Text Formatter</p>
-          <h1>Convert AI Markdown into copy-ready LinkedIn text.</h1>
+          <h1>Format a LinkedIn post.</h1>
           <p>
-            Paste a draft, keep useful structure, transform emphasis into Unicode styles,
-            and copy a version that will not show raw Markdown marks inside LinkedIn.
+            Paste Markdown or write normally. Select text to style it, then copy the post.
           </p>
         </div>
       </section>

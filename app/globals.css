@@ -316,6 +316,10 @@ button:hover,
   grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
 }
 
+.formatter-layout.single {
+  grid-template-columns: 1fr;
+}
+
 .compose-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -323,7 +327,7 @@ button:hover,
   box-shadow: 0 18px 45px rgba(39, 49, 58, 0.08);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 560px;
+  min-height: 620px;
   overflow: hidden;
 }
 
@@ -357,6 +361,14 @@ button:hover,
   min-width: 58px;
 }
 
+.toolbar-button.copy {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+  margin-left: auto;
+  min-width: 74px;
+}
+
 .toolbar-divider {
   background: var(--line);
   display: inline-block;
@@ -368,7 +380,7 @@ button:hover,
 .linkedin-editor {
   font-size: 1rem;
   line-height: 1.62;
-  min-height: 430px;
+  min-height: 500px;
 }
 
 .linkedin-editor::placeholder {
@@ -376,7 +388,18 @@ button:hover,
 }
 
 .editor-stats {
+  align-items: center;
   background: #fbfcfd;
+  padding-top: 0;
+}
+
+.compact-toggle {
+  margin-left: auto;
+}
+
+.compact-toggle input {
+  height: 16px;
+  width: 16px;
 }
 
 .section-heading {
@@ -639,9 +662,17 @@ pre {
   border-bottom: 1px solid var(--line);
 }
 
+.compact-hero {
+  padding-bottom: 26px;
+}
+
 .subpage-heading {
   margin: 70px auto 0;
   max-width: 980px;
+}
+
+.compact-hero .subpage-heading {
+  margin-top: 42px;
 }
 
 .subpage-heading h1 {
@@ -649,6 +680,10 @@ pre {
   letter-spacing: 0;
   line-height: 0.98;
   margin: 0;
+}
+
+.compact-hero .subpage-heading h1 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
 }
 
 .subpage-heading p:not(.eyebrow) {

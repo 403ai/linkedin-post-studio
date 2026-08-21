@@ -6,7 +6,6 @@ import {
   countWords,
   defaultDraft,
   formatMarkdownInline,
-  formatOptions,
   makeList,
   StyleKey,
   stylizeText,
@@ -21,8 +20,6 @@ const toolbarStyles: { key: StyleKey; label: string; title: string }[] = [
   { key: "strike", label: "S", title: "Strikethrough selected text" },
   { key: "sansBold", label: "Aa", title: "Bold sans selected text" },
   { key: "script", label: "Sc", title: "Script selected text" },
-  { key: "double", label: "Db", title: "Doublestruck selected text" },
-  { key: "fullwidth", label: "Fw", title: "Fullwidth selected text" },
 ];
 
 export function TextFormatter() {
@@ -120,21 +117,7 @@ export function TextFormatter() {
 
   return (
     <div className="formatter-stack">
-      <div className="editor-mode-row">
-        <label className="toggle-control">
-          <input
-            checked={autoConvertMarkdown}
-            onChange={(event) => setAutoConvertMarkdown(event.target.checked)}
-            type="checkbox"
-          />
-          Auto-convert Markdown on paste
-        </label>
-        <button type="button" onClick={convertEditorMarkdown}>
-          Convert current draft
-        </button>
-      </div>
-
-      <div className="formatter-layout">
+      <div className="formatter-layout single">
         <section className="compose-panel" aria-label="LinkedIn-safe text editor">
           <div className="format-toolbar" aria-label="Formatting toolbar">
             {toolbarStyles.map((tool) => (
@@ -162,6 +145,12 @@ export function TextFormatter() {
             <button className="toolbar-button wide" onClick={clearStyles} title="Clean selected text" type="button">
               Clean
             </button>
+            <button className="toolbar-button wide" onClick={convertEditorMarkdown} title="Convert Markdown in current draft" type="button">
+              MD
+            </button>
+            <button className="toolbar-button copy" onClick={() => copyText(previewText, "copy")} title="Copy post" type="button">
+              {copiedLabel === "copy" ? "Copied" : "Copy"}
+            </button>
           </div>
 
           <textarea
@@ -178,53 +167,16 @@ export function TextFormatter() {
             <span>{previewText.length} characters</span>
             <span>{countWords(previewText)} words</span>
             <span>{previewText.split("\n").length} lines</span>
+            <label className="toggle-control compact-toggle">
+              <input
+                checked={autoConvertMarkdown}
+                onChange={(event) => setAutoConvertMarkdown(event.target.checked)}
+                type="checkbox"
+              />
+              Convert Markdown on paste
+            </label>
           </div>
         </section>
-
-        <div className="preview-panel">
-          <div className="panel-head">
-            <span>Copy-ready output</span>
-            <button type="button" onClick={() => copyText(previewText, "output")}>
-              {copiedLabel === "output" ? "Copied" : "Copy"}
-            </button>
-          </div>
-          <pre>{previewText}</pre>
-          <div className="stats-row">
-            <span>{previewText.length} characters</span>
-            <span>{countWords(previewText)} words</span>
-            <span>{previewText.split("\n").length} lines</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="format-grid selection-grid" aria-label="More text styles">
-        {formatOptions.map((option) => (
-          <button
-            className="format-card"
-            key={option.key}
-            type="button"
-            onClick={() => applyStyle(option.key)}
-          >
-            <span>{option.label}</span>
-            <small>{option.note}</small>
-            <strong>{stylizeText("LinkedIn", option.key)}</strong>
-          </button>
-        ))}
-      </div>
-
-      <div className="quick-actions" aria-label="List format actions">
-        <button type="button" onClick={() => copyText(previewText, "copy")}>
-          {copiedLabel === "copy" ? "Copied" : "Copy post"}
-        </button>
-        <button type="button" onClick={() => copyText(makeList(draft, "bullet"), "bullet")}>
-          {copiedLabel === "bullet" ? "Copied" : "Copy bullet list"}
-        </button>
-        <button type="button" onClick={() => copyText(makeList(draft, "number"), "number")}>
-          {copiedLabel === "number" ? "Copied" : "Copy numbered list"}
-        </button>
-        <button type="button" onClick={() => copyText(makeList(draft, "check"), "check")}>
-          {copiedLabel === "check" ? "Copied" : "Copy checklist"}
-        </button>
       </div>
     </div>
   );
