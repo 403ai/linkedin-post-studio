@@ -284,6 +284,101 @@ button:hover,
   gap: 18px;
 }
 
+.editor-mode-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.editor-mode-row button {
+  min-height: 38px;
+}
+
+.toggle-control {
+  align-items: center;
+  color: var(--graphite);
+  display: inline-flex;
+  font-weight: 750;
+  gap: 10px;
+}
+
+.toggle-control input {
+  accent-color: var(--blue);
+  height: 18px;
+  width: 18px;
+}
+
+.formatter-layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+}
+
+.compose-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(39, 49, 58, 0.08);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+.format-toolbar {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 58px;
+  padding: 10px;
+}
+
+.toolbar-button {
+  background: #f3f5f7;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--graphite);
+  font-weight: 850;
+  min-height: 34px;
+  min-width: 34px;
+  padding: 0 9px;
+}
+
+.toolbar-button:hover {
+  background: #e8f2fc;
+  border-color: #c8deef;
+}
+
+.toolbar-button.wide {
+  min-width: 58px;
+}
+
+.toolbar-divider {
+  background: var(--line);
+  display: inline-block;
+  height: 24px;
+  margin: 0 4px;
+  width: 1px;
+}
+
+.linkedin-editor {
+  font-size: 1rem;
+  line-height: 1.62;
+  min-height: 430px;
+}
+
+.linkedin-editor::placeholder {
+  color: #9aa7b3;
+}
+
+.editor-stats {
+  background: #fbfcfd;
+}
+
 .section-heading {
   margin-bottom: 26px;
   max-width: 720px;
@@ -380,6 +475,10 @@ pre {
   gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 18px;
+}
+
+.selection-grid {
+  margin-top: 0;
 }
 
 .format-card {
@@ -643,6 +742,7 @@ pre {
 
   .hero-grid,
   .editor-grid,
+  .formatter-layout,
   .limits,
   .tool-split,
   .starter-tool {
