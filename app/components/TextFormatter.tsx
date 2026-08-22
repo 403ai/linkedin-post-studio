@@ -15,6 +15,10 @@ import { LinkedInPostCard } from "./LinkedInPostCard";
 
 type ListFormat = "bullet" | "number" | "check";
 type FormatterView = "write" | "preview" | "checks";
+type PreviewDevice = "desktop" | "mobile";
+
+const LINKEDIN_POST_LIMIT = 3000;
+const emojiOptions = ["😀", "🔥", "👏", "✅", "🚀", "💡", "🎯", "📌", "👇", "⭐"];
 
 const toolbarStyles: { key: StyleKey; label: string; title: string }[] = [
   { key: "bold", label: "B", title: "Bold selected text" },
@@ -27,17 +31,28 @@ const toolbarStyles: { key: StyleKey; label: string; title: string }[] = [
 
 export function TextFormatter() {
   const [draft, setDraft] = useState(() => formatMarkdownInline(defaultDraft));
+  const [history, setHistory] = useState<string[]>([]);
+  const [future, setFuture] = useState<string[]>([]);
   const [autoConvertMarkdown, setAutoConvertMarkdown] = useState(true);
   const [copiedLabel, setCopiedLabel] = useState("");
   const [activeView, setActiveView] = useState<FormatterView>("write");
+  const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
+  const [previewExpanded, setPreviewExpanded] = useState(false);
   const [pasteStatus, setPasteStatus] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [imageUrlOpen, setImageUrlOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
   const previewText = useMemo(() => cleanMarkdown(draft), [draft]);
   const checks = useMemo(() => {
     const styledCharacters = Array.from(previewText).filter((character) => {
       const code = character.codePointAt(0) ?? 0;
-      return code > 0x024f || /[\u0332\u0336]/u.test(character);
+      return (
+        (code >= 0x1d400 && code <= 0x1d7ff) ||
+        (code >= 0xff10 && code <= 0xff5a) ||
+        /[\u0332\u0336]/u.test(character)
+      );
     }).length;
     const hashtags = previewText.match(/(^|\s)#[\p{L}\p{N}_]+/gu) ?? [];
     const mentions = previewText.match(/(^|\s)@[\p{L}\p{N}_.-]+/gu) ?? [];
@@ -52,6 +67,8 @@ export function TextFormatter() {
       mentions: mentions.length,
       styledCharacters,
       status,
+      remaining: LINKEDIN_POST_LIMIT - previewText.length,
+      limitPercent: Math.min(100, Math.round((previewText.length / LINKEDIN_POST_LIMIT) * 100)),
     };
   }, [previewText]);
 
@@ -64,6 +81,39 @@ export function TextFormatter() {
   function showPasteStatus(message: string) {
     setPasteStatus(message);
     window.setTimeout(() => setPasteStatus(""), 1800);
+  }
+
+  function updateDraft(nextDraft: string, remember = true) {
+    if (remember && nextDraft !== draft) {
+      setHistory((items) => [...items.slice(-60), draft]);
+      setFuture([]);
+    }
+
+    setDraft(nextDraft);
+  }
+
+  function undoDraft() {
+    const previous = history.at(-1);
+    if (previous === undefined) {
+      return;
+    }
+
+    setHistory((items) => items.slice(0, -1));
+    setFuture((items) => [draft, ...items.slice(0, 60)]);
+    setDraft(previous);
+    focusSelection(previous.length, previous.length);
+  }
+
+  function redoDraft() {
+    const next = future[0];
+    if (next === undefined) {
+      return;
+    }
+
+    setFuture((items) => items.slice(1));
+    setHistory((items) => [...items.slice(-60), draft]);
+    setDraft(next);
+    focusSelection(next.length, next.length);
   }
 
   function focusSelection(start: number, end: number) {
@@ -95,7 +145,7 @@ export function TextFormatter() {
 
   function replaceRange(start: number, end: number, replacement: string) {
     const nextDraft = `${draft.slice(0, start)}${replacement}${draft.slice(end)}`;
-    setDraft(nextDraft);
+    updateDraft(nextDraft);
     focusSelection(start, start + replacement.length);
   }
 
@@ -123,8 +173,13 @@ export function TextFormatter() {
 
   function convertEditorMarkdown() {
     const converted = formatMarkdownInline(draft);
-    setDraft(converted);
+    updateDraft(converted);
     focusSelection(converted.length, converted.length);
+  }
+
+  function insertText(text: string) {
+    const { start, end } = getTargetRange();
+    replaceRange(start, end, text);
   }
 
   function clearStyles() {
@@ -195,6 +250,31 @@ export function TextFormatter() {
                   ✓
                 </button>
                 <span className="toolbar-divider" />
+                <div className="toolbar-popover">
+                  <button className="toolbar-button" onClick={() => setEmojiOpen((open) => !open)} title="Add emoji" type="button">
+                    ☺
+                  </button>
+                  {emojiOpen && (
+                    <div className="emoji-menu">
+                      {emojiOptions.map((emoji) => (
+                        <button key={emoji} onClick={() => insertText(emoji)} type="button">
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add picture URL" type="button">
+                  ▧
+                </button>
+                <span className="toolbar-divider" />
+                <button className="toolbar-button" disabled={!history.length} onClick={undoDraft} title="Undo" type="button">
+                  ↶
+                </button>
+                <button className="toolbar-button" disabled={!future.length} onClick={redoDraft} title="Redo" type="button">
+                  ↷
+                </button>
+                <span className="toolbar-divider" />
                 <button className="toolbar-button wide" onClick={clearStyles} title="Clean selected text" type="button">
                   Clean
                 </button>
@@ -214,11 +294,24 @@ export function TextFormatter() {
                   </div>
                 </details>
               </div>
+              {imageUrlOpen && (
+                <div className="image-url-row">
+                  <input
+                    onChange={(event) => setImageUrl(event.target.value)}
+                    placeholder="Paste image URL for preview"
+                    type="url"
+                    value={imageUrl}
+                  />
+                  <button onClick={() => imageUrl && insertText(`\n${imageUrl}`)} type="button">
+                    Insert URL
+                  </button>
+                </div>
+              )}
 
               <textarea
                 aria-label="Post editor"
                 className="linkedin-editor"
-                onChange={(event) => setDraft(event.target.value)}
+                onChange={(event) => updateDraft(event.target.value)}
                 onPaste={handlePaste}
                 placeholder="Write here or paste Markdown from ChatGPT..."
                 ref={editorRef}
@@ -229,7 +322,34 @@ export function TextFormatter() {
 
           {activeView === "preview" && (
             <div className="preview-view">
-              <LinkedInPostCard text={previewText} author="Preview profile" meta="LinkedIn post preview • draft" />
+              <div className="preview-device-row">
+                <div className="segmented-control small" aria-label="Preview device">
+                  {(["desktop", "mobile"] as PreviewDevice[]).map((device) => (
+                    <button
+                      aria-pressed={previewDevice === device}
+                      className={previewDevice === device ? "active" : ""}
+                      key={device}
+                      onClick={() => {
+                        setPreviewDevice(device);
+                        setPreviewExpanded(false);
+                      }}
+                      type="button"
+                    >
+                      {device}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <LinkedInPostCard
+                device={previewDevice}
+                expanded={previewExpanded}
+                imageUrl={imageUrl}
+                meta="Growth at Typegrow | Helping you grow LinkedIn audience with AI"
+                onToggleExpanded={() => setPreviewExpanded((expanded) => !expanded)}
+                text={previewText}
+                truncateAt={previewDevice === "mobile" ? 135 : 210}
+                author="Alex Dahud"
+              />
             </div>
           )}
 
@@ -245,12 +365,20 @@ export function TextFormatter() {
               </div>
               <div className="check-grid">
                 <article><strong>{checks.characters}</strong><span>characters</span></article>
+                <article className={checks.remaining < 0 ? "limit-over" : ""}>
+                  <strong>{checks.remaining >= 0 ? checks.remaining : Math.abs(checks.remaining)}</strong>
+                  <span>{checks.remaining >= 0 ? "characters left" : "characters over"}</span>
+                </article>
                 <article><strong>{checks.words}</strong><span>words</span></article>
                 <article><strong>{checks.lines}</strong><span>lines</span></article>
                 <article><strong>{checks.hashtags}</strong><span>hashtags</span></article>
                 <article><strong>{checks.mentions}</strong><span>mentions</span></article>
                 <article><strong>{checks.styledCharacters}</strong><span>styled characters</span></article>
               </div>
+              <div className="limit-meter" aria-label="LinkedIn post character limit">
+                <span style={{ width: `${checks.limitPercent}%` }} />
+              </div>
+              <p className="limit-note">LinkedIn feed posts allow up to {LINKEDIN_POST_LIMIT.toLocaleString()} characters.</p>
             </div>
           )}
 
