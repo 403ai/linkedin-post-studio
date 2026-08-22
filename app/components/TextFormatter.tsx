@@ -1,6 +1,7 @@
 "use client";
 
 import { ClipboardEvent, useMemo, useRef, useState } from "react";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import {
   cleanMarkdown,
   countWords,
@@ -18,7 +19,6 @@ type FormatterView = "write" | "preview" | "checks";
 type PreviewDevice = "desktop" | "mobile";
 
 const LINKEDIN_POST_LIMIT = 3000;
-const emojiOptions = ["😀", "🔥", "👏", "✅", "🚀", "💡", "🎯", "📌", "👇", "⭐"];
 
 const toolbarStyles: { key: StyleKey; label: string; title: string }[] = [
   { key: "bold", label: "B", title: "Bold selected text" },
@@ -41,7 +41,9 @@ export function TextFormatter() {
   const [pasteStatus, setPasteStatus] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [imageUrlOpen, setImageUrlOpen] = useState(false);
+  const [linkUrlOpen, setLinkUrlOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
   const previewText = useMemo(() => cleanMarkdown(draft), [draft]);
@@ -182,6 +184,32 @@ export function TextFormatter() {
     replaceRange(start, end, text);
   }
 
+  function insertUrl(url: string) {
+    const cleanUrl = url.trim();
+    if (!cleanUrl) {
+      return;
+    }
+
+    insertText(cleanUrl);
+    setLinkUrl("");
+    setLinkUrlOpen(false);
+  }
+
+  function addPreviewImage(url: string) {
+    const cleanUrl = url.trim();
+    if (!cleanUrl) {
+      return;
+    }
+
+    setImageUrl(cleanUrl);
+    setImageUrlOpen(false);
+  }
+
+  function handleEmojiClick(emoji: EmojiClickData) {
+    insertText(emoji.emoji);
+    setEmojiOpen(false);
+  }
+
   function clearStyles() {
     const { start, end } = getTargetRange("line");
     const selectedText = draft.slice(start, end);
@@ -256,16 +284,22 @@ export function TextFormatter() {
                   </button>
                   {emojiOpen && (
                     <div className="emoji-menu">
-                      {emojiOptions.map((emoji) => (
-                        <button key={emoji} onClick={() => insertText(emoji)} type="button">
-                          {emoji}
-                        </button>
-                      ))}
+                      <EmojiPicker
+                        height={390}
+                        lazyLoadEmojis
+                        onEmojiClick={handleEmojiClick}
+                        previewConfig={{ showPreview: false }}
+                        searchPlaceholder="Search emoji"
+                        width="100%"
+                      />
                     </div>
                   )}
                 </div>
-                <button className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add picture URL" type="button">
+                <button className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add image preview" type="button">
                   ▧
+                </button>
+                <button className="toolbar-button" onClick={() => setLinkUrlOpen((open) => !open)} title="Insert link URL" type="button">
+                  🌐
                 </button>
                 <span className="toolbar-divider" />
                 <button className="toolbar-button" disabled={!history.length} onClick={undoDraft} title="Undo" type="button">
@@ -298,12 +332,25 @@ export function TextFormatter() {
                 <div className="image-url-row">
                   <input
                     onChange={(event) => setImageUrl(event.target.value)}
-                    placeholder="Paste image URL for preview"
+                    placeholder="Paste image URL for preview only"
                     type="url"
                     value={imageUrl}
                   />
-                  <button onClick={() => imageUrl && insertText(`\n${imageUrl}`)} type="button">
-                    Insert URL
+                  <button onClick={() => addPreviewImage(imageUrl)} type="button">
+                    Add image
+                  </button>
+                </div>
+              )}
+              {linkUrlOpen && (
+                <div className="image-url-row">
+                  <input
+                    onChange={(event) => setLinkUrl(event.target.value)}
+                    placeholder="Paste link URL to add to post text"
+                    type="url"
+                    value={linkUrl}
+                  />
+                  <button onClick={() => insertUrl(linkUrl)} type="button">
+                    Insert link
                   </button>
                 </div>
               )}
