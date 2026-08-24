@@ -3,6 +3,26 @@
 import { ClipboardEvent, useMemo, useRef, useState } from "react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import {
+  Bold,
+  Code2,
+  Eraser,
+  Image,
+  Italic,
+  Link,
+  List,
+  ListChecks,
+  ListOrdered,
+  MoreHorizontal,
+  Redo2,
+  Smile,
+  Sparkles,
+  Strikethrough,
+  Type,
+  Underline,
+  Undo2,
+  type LucideIcon,
+} from "lucide-react";
+import {
   cleanMarkdown,
   countWords,
   defaultDraft,
@@ -19,14 +39,15 @@ type FormatterView = "write" | "preview" | "checks";
 type PreviewDevice = "desktop" | "mobile";
 
 const LINKEDIN_POST_LIMIT = 3000;
+const ICON_SIZE = 16;
 
-const toolbarStyles: { key: StyleKey; label: string; title: string }[] = [
-  { key: "bold", label: "B", title: "Bold selected text" },
-  { key: "italic", label: "I", title: "Italic selected text" },
-  { key: "underline", label: "U", title: "Underline selected text" },
-  { key: "strike", label: "S", title: "Strikethrough selected text" },
-  { key: "sansBold", label: "Aa", title: "Bold sans selected text" },
-  { key: "script", label: "Sc", title: "Script selected text" },
+const toolbarStyles: { key: StyleKey; Icon: LucideIcon; title: string }[] = [
+  { key: "bold", Icon: Bold, title: "Bold selected text" },
+  { key: "italic", Icon: Italic, title: "Italic selected text" },
+  { key: "underline", Icon: Underline, title: "Underline selected text" },
+  { key: "strike", Icon: Strikethrough, title: "Strikethrough selected text" },
+  { key: "sansBold", Icon: Type, title: "Bold sans selected text" },
+  { key: "script", Icon: Sparkles, title: "Script selected text" },
 ];
 
 export function TextFormatter() {
@@ -258,29 +279,30 @@ export function TextFormatter() {
               <div className="format-toolbar" aria-label="Formatting toolbar">
                 {toolbarStyles.map((tool) => (
                   <button
+                    aria-label={tool.title}
                     className="toolbar-button"
                     key={tool.key}
                     onClick={() => applyStyle(tool.key)}
                     title={tool.title}
                     type="button"
                   >
-                    {tool.label}
+                    <tool.Icon aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                   </button>
                 ))}
                 <span className="toolbar-divider" />
-                <button className="toolbar-button" onClick={() => applyList("bullet")} title="Bulleted list" type="button">
-                  •
+                <button aria-label="Bulleted list" className="toolbar-button" onClick={() => applyList("bullet")} title="Bulleted list" type="button">
+                  <List aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
-                <button className="toolbar-button" onClick={() => applyList("number")} title="Numbered list" type="button">
-                  1.
+                <button aria-label="Numbered list" className="toolbar-button" onClick={() => applyList("number")} title="Numbered list" type="button">
+                  <ListOrdered aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
-                <button className="toolbar-button" onClick={() => applyList("check")} title="Checklist" type="button">
-                  ✓
+                <button aria-label="Checklist" className="toolbar-button" onClick={() => applyList("check")} title="Checklist" type="button">
+                  <ListChecks aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
                 <span className="toolbar-divider" />
                 <div className="toolbar-popover">
-                  <button className="toolbar-button" onClick={() => setEmojiOpen((open) => !open)} title="Add emoji" type="button">
-                    ☺
+                  <button aria-label="Add emoji" className="toolbar-button" onClick={() => setEmojiOpen((open) => !open)} title="Add emoji" type="button">
+                    <Smile aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                   </button>
                   {emojiOpen && (
                     <div className="emoji-menu">
@@ -295,28 +317,30 @@ export function TextFormatter() {
                     </div>
                   )}
                 </div>
-                <button className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add image preview" type="button">
-                  ▧
+                <button aria-label="Add image preview" className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add image preview" type="button">
+                  <Image aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
-                <button className="toolbar-button" onClick={() => setLinkUrlOpen((open) => !open)} title="Insert link URL" type="button">
-                  🌐
-                </button>
-                <span className="toolbar-divider" />
-                <button className="toolbar-button" disabled={!history.length} onClick={undoDraft} title="Undo" type="button">
-                  ↶
-                </button>
-                <button className="toolbar-button" disabled={!future.length} onClick={redoDraft} title="Redo" type="button">
-                  ↷
+                <button aria-label="Insert link URL" className="toolbar-button" onClick={() => setLinkUrlOpen((open) => !open)} title="Insert link URL" type="button">
+                  <Link aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
                 <span className="toolbar-divider" />
-                <button className="toolbar-button wide" onClick={clearStyles} title="Clean selected text" type="button">
-                  Clean
+                <button aria-label="Undo" className="toolbar-button" disabled={!history.length} onClick={undoDraft} title="Undo" type="button">
+                  <Undo2 aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
-                <button className="toolbar-button wide" onClick={convertEditorMarkdown} title="Convert Markdown in current draft" type="button">
-                  MD
+                <button aria-label="Redo" className="toolbar-button" disabled={!future.length} onClick={redoDraft} title="Redo" type="button">
+                  <Redo2 aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
+                </button>
+                <span className="toolbar-divider" />
+                <button aria-label="Clean selected text" className="toolbar-button" onClick={clearStyles} title="Clean selected text" type="button">
+                  <Eraser aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
+                </button>
+                <button aria-label="Convert Markdown in current draft" className="toolbar-button" onClick={convertEditorMarkdown} title="Convert Markdown in current draft" type="button">
+                  <Code2 aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
                 <details className="more-styles">
-                  <summary>More</summary>
+                  <summary aria-label="More styles" title="More styles">
+                    <MoreHorizontal aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
+                  </summary>
                   <div>
                     {formatOptions
                       .filter((option) => !["plain", "bold", "italic", "underline", "strike", "sansBold", "script"].includes(option.key))
