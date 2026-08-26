@@ -1,21 +1,18 @@
 "use client";
 
 import { ClipboardEvent, useMemo, useRef, useState } from "react";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import {
   Bold,
+  ChevronDown,
   Code2,
   Eraser,
-  Image,
   Italic,
-  Link,
   List,
   ListChecks,
   ListOrdered,
-  MoreHorizontal,
   Redo2,
   Smile,
-  Sparkles,
   Strikethrough,
   Type,
   Underline,
@@ -29,13 +26,15 @@ import {
   formatMarkdownInline,
   formatOptions,
   makeList,
+  normalizeLinkedInText,
   StyleKey,
   stylizeText,
 } from "../lib/linkedinFormatting";
 import { LinkedInPostCard } from "./LinkedInPostCard";
 
 type ListFormat = "bullet" | "number" | "check";
-type FormatterView = "write" | "preview" | "checks";
+type FormatterView = "write" | "preview";
+type OpenPanel = "font" | "emoji" | null;
 type PreviewDevice = "desktop" | "mobile";
 
 const LINKEDIN_POST_LIMIT = 3000;
@@ -46,9 +45,20 @@ const toolbarStyles: { key: StyleKey; Icon: LucideIcon; title: string }[] = [
   { key: "italic", Icon: Italic, title: "Italic selected text" },
   { key: "underline", Icon: Underline, title: "Underline selected text" },
   { key: "strike", Icon: Strikethrough, title: "Strikethrough selected text" },
-  { key: "sansBold", Icon: Type, title: "Bold sans selected text" },
-  { key: "script", Icon: Sparkles, title: "Script selected text" },
 ];
+
+const fontStyleKeys = new Set<StyleKey>([
+  "boldItalic",
+  "sans",
+  "sansBold",
+  "sansItalic",
+  "sansBoldItalic",
+  "script",
+  "double",
+  "fullwidth",
+]);
+
+const fontStyles = formatOptions.filter((option) => fontStyleKeys.has(option.key));
 
 export function TextFormatter() {
   const [draft, setDraft] = useState(() => formatMarkdownInline(defaultDraft));
@@ -60,11 +70,7 @@ export function TextFormatter() {
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [pasteStatus, setPasteStatus] = useState("");
-  const [emojiOpen, setEmojiOpen] = useState(false);
-  const [imageUrlOpen, setImageUrlOpen] = useState(false);
-  const [linkUrlOpen, setLinkUrlOpen] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [linkUrl, setLinkUrl] = useState("");
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
   const previewText = useMemo(() => cleanMarkdown(draft), [draft]);
@@ -106,6 +112,14 @@ export function TextFormatter() {
     window.setTimeout(() => setPasteStatus(""), 1800);
   }
 
+  function closePanel() {
+    setOpenPanel(null);
+  }
+
+  function togglePanel(panel: Exclude<OpenPanel, null>) {
+    setOpenPanel((currentPanel) => (currentPanel === panel ? null : panel));
+  }
+
   function updateDraft(nextDraft: string, remember = true) {
     if (remember && nextDraft !== draft) {
       setHistory((items) => [...items.slice(-60), draft]);
@@ -116,6 +130,7 @@ export function TextFormatter() {
   }
 
   function undoDraft() {
+    closePanel();
     const previous = history.at(-1);
     if (previous === undefined) {
       return;
@@ -128,6 +143,7 @@ export function TextFormatter() {
   }
 
   function redoDraft() {
+    closePanel();
     const next = future[0];
     if (next === undefined) {
       return;
@@ -173,6 +189,7 @@ export function TextFormatter() {
   }
 
   function applyStyle(style: StyleKey) {
+    closePanel();
     const { start, end } = getTargetRange("line");
     const selectedText = draft.slice(start, end);
 
@@ -184,6 +201,7 @@ export function TextFormatter() {
   }
 
   function applyList(type: ListFormat) {
+    closePanel();
     const { start, end } = getTargetRange("line");
     const selectedText = draft.slice(start, end);
 
@@ -195,6 +213,7 @@ export function TextFormatter() {
   }
 
   function convertEditorMarkdown() {
+    closePanel();
     const converted = formatMarkdownInline(draft);
     updateDraft(converted);
     focusSelection(converted.length, converted.length);
@@ -205,36 +224,16 @@ export function TextFormatter() {
     replaceRange(start, end, text);
   }
 
-  function insertUrl(url: string) {
-    const cleanUrl = url.trim();
-    if (!cleanUrl) {
-      return;
-    }
-
-    insertText(cleanUrl);
-    setLinkUrl("");
-    setLinkUrlOpen(false);
-  }
-
-  function addPreviewImage(url: string) {
-    const cleanUrl = url.trim();
-    if (!cleanUrl) {
-      return;
-    }
-
-    setImageUrl(cleanUrl);
-    setImageUrlOpen(false);
-  }
-
   function handleEmojiClick(emoji: EmojiClickData) {
     insertText(emoji.emoji);
-    setEmojiOpen(false);
+    closePanel();
   }
 
   function clearStyles() {
+    closePanel();
     const { start, end } = getTargetRange("line");
     const selectedText = draft.slice(start, end);
-    replaceRange(start, end, cleanMarkdown(selectedText));
+    replaceRange(start, end, normalizeLinkedInText(selectedText));
   }
 
   function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
@@ -255,7 +254,7 @@ export function TextFormatter() {
     <div className="formatter-stack">
       <div className="formatter-topline">
         <div className="segmented-control" aria-label="Formatter views">
-          {(["write", "preview", "checks"] as FormatterView[]).map((view) => (
+          {(["write", "preview"] as FormatterView[]).map((view) => (
             <button
               aria-pressed={activeView === view}
               className={activeView === view ? "active" : ""}
@@ -289,6 +288,29 @@ export function TextFormatter() {
                     <tool.Icon aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                   </button>
                 ))}
+                <div className="toolbar-popover">
+                  <button
+                    aria-expanded={openPanel === "font"}
+                    aria-label="Font styles"
+                    className="toolbar-button font-menu-trigger"
+                    onClick={() => togglePanel("font")}
+                    title="Font styles"
+                    type="button"
+                  >
+                    <Type aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
+                    <ChevronDown aria-hidden="true" size={12} strokeWidth={2.4} />
+                  </button>
+                  {openPanel === "font" && (
+                    <div className="font-style-menu">
+                      {fontStyles.map((option) => (
+                        <button key={option.key} onClick={() => applyStyle(option.key)} type="button">
+                          <span>{option.label}</span>
+                          <small>{option.note}</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <span className="toolbar-divider" />
                 <button aria-label="Bulleted list" className="toolbar-button" onClick={() => applyList("bullet")} title="Bulleted list" type="button">
                   <List aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
@@ -301,28 +323,33 @@ export function TextFormatter() {
                 </button>
                 <span className="toolbar-divider" />
                 <div className="toolbar-popover">
-                  <button aria-label="Add emoji" className="toolbar-button" onClick={() => setEmojiOpen((open) => !open)} title="Add emoji" type="button">
+                  <button
+                    aria-expanded={openPanel === "emoji"}
+                    aria-label="Add emoji"
+                    className="toolbar-button"
+                    onClick={() => togglePanel("emoji")}
+                    title="Add emoji"
+                    type="button"
+                  >
                     <Smile aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                   </button>
-                  {emojiOpen && (
+                  {openPanel === "emoji" && (
                     <div className="emoji-menu">
                       <EmojiPicker
-                        height={390}
+                        className="linkedin-emoji-picker"
+                        emojiStyle={EmojiStyle.NATIVE}
+                        height={430}
                         lazyLoadEmojis
                         onEmojiClick={handleEmojiClick}
                         previewConfig={{ showPreview: false }}
                         searchPlaceholder="Search emoji"
+                        skinTonesDisabled
+                        theme={Theme.LIGHT}
                         width="100%"
                       />
                     </div>
                   )}
                 </div>
-                <button aria-label="Add image preview" className="toolbar-button" onClick={() => setImageUrlOpen((open) => !open)} title="Add image preview" type="button">
-                  <Image aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
-                </button>
-                <button aria-label="Insert link URL" className="toolbar-button" onClick={() => setLinkUrlOpen((open) => !open)} title="Insert link URL" type="button">
-                  <Link aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
-                </button>
                 <span className="toolbar-divider" />
                 <button aria-label="Undo" className="toolbar-button" disabled={!history.length} onClick={undoDraft} title="Undo" type="button">
                   <Undo2 aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
@@ -337,47 +364,7 @@ export function TextFormatter() {
                 <button aria-label="Convert Markdown in current draft" className="toolbar-button" onClick={convertEditorMarkdown} title="Convert Markdown in current draft" type="button">
                   <Code2 aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
                 </button>
-                <details className="more-styles">
-                  <summary aria-label="More styles" title="More styles">
-                    <MoreHorizontal aria-hidden="true" size={ICON_SIZE} strokeWidth={2.25} />
-                  </summary>
-                  <div>
-                    {formatOptions
-                      .filter((option) => !["plain", "bold", "italic", "underline", "strike", "sansBold", "script"].includes(option.key))
-                      .map((option) => (
-                        <button key={option.key} onClick={() => applyStyle(option.key)} type="button">
-                          {option.label}
-                        </button>
-                      ))}
-                  </div>
-                </details>
               </div>
-              {imageUrlOpen && (
-                <div className="image-url-row">
-                  <input
-                    onChange={(event) => setImageUrl(event.target.value)}
-                    placeholder="Paste image URL for preview only"
-                    type="url"
-                    value={imageUrl}
-                  />
-                  <button onClick={() => addPreviewImage(imageUrl)} type="button">
-                    Add image
-                  </button>
-                </div>
-              )}
-              {linkUrlOpen && (
-                <div className="image-url-row">
-                  <input
-                    onChange={(event) => setLinkUrl(event.target.value)}
-                    placeholder="Paste link URL to add to post text"
-                    type="url"
-                    value={linkUrl}
-                  />
-                  <button onClick={() => insertUrl(linkUrl)} type="button">
-                    Insert link
-                  </button>
-                </div>
-              )}
 
               <textarea
                 aria-label="Post editor"
@@ -414,7 +401,7 @@ export function TextFormatter() {
               <LinkedInPostCard
                 device={previewDevice}
                 expanded={previewExpanded}
-                imageUrl={imageUrl}
+                imageUrl=""
                 meta="Growth at Typegrow | Helping you grow LinkedIn audience with AI"
                 onToggleExpanded={() => setPreviewExpanded((expanded) => !expanded)}
                 text={previewText}
@@ -424,39 +411,17 @@ export function TextFormatter() {
             </div>
           )}
 
-          {activeView === "checks" && (
-            <div className="checks-view">
-              <div className={checks.status === "LinkedIn-safe" ? "safety-banner safe" : "safety-banner warning"}>
-                <strong>{checks.status}</strong>
-                <span>
-                  {checks.status === "LinkedIn-safe"
-                    ? "The post is mostly plain text and should paste cleanly into LinkedIn."
-                    : "Styled Unicode is best for short emphasis, not long paragraphs."}
-                </span>
-              </div>
-              <div className="check-grid">
-                <article><strong>{checks.characters}</strong><span>characters</span></article>
-                <article className={checks.remaining < 0 ? "limit-over" : ""}>
-                  <strong>{checks.remaining >= 0 ? checks.remaining : Math.abs(checks.remaining)}</strong>
-                  <span>{checks.remaining >= 0 ? "characters left" : "characters over"}</span>
-                </article>
-                <article><strong>{checks.words}</strong><span>words</span></article>
-                <article><strong>{checks.lines}</strong><span>lines</span></article>
-                <article><strong>{checks.hashtags}</strong><span>hashtags</span></article>
-                <article><strong>{checks.mentions}</strong><span>mentions</span></article>
-                <article><strong>{checks.styledCharacters}</strong><span>styled characters</span></article>
-              </div>
-              <div className="limit-meter" aria-label="LinkedIn post character limit">
-                <span style={{ width: `${checks.limitPercent}%` }} />
-              </div>
-              <p className="limit-note">LinkedIn feed posts allow up to {LINKEDIN_POST_LIMIT.toLocaleString()} characters.</p>
-            </div>
-          )}
-
           <div className="stats-row editor-stats">
             <span>{checks.characters} characters</span>
+            <span className={checks.remaining < 0 ? "limit-over" : ""}>
+              {checks.remaining >= 0 ? checks.remaining : Math.abs(checks.remaining)} {checks.remaining >= 0 ? "left" : "over"}
+            </span>
             <span>{checks.words} words</span>
+            <span>{checks.lines} lines</span>
             <span>{checks.hashtags} hashtags</span>
+            <span>{checks.mentions} mentions</span>
+            <span>{checks.styledCharacters} styled</span>
+            <span className={checks.status === "LinkedIn-safe" ? "status-pill safe" : "status-pill warning"}>{checks.status}</span>
             {pasteStatus && <span className="paste-status">{pasteStatus}</span>}
             <label className="toggle-control compact-toggle">
               <input

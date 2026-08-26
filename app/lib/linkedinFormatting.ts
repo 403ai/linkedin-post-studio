@@ -128,6 +128,10 @@ const scriptFallback: Record<string, string> = {
   z: "𝓏",
 };
 
+const reverseFallbacks = Object.fromEntries(
+  Object.entries({ ...doubleUpperFallback, ...italicFallback, ...scriptFallback }).map(([plain, styled]) => [styled, plain]),
+) as Record<string, string>;
+
 function convertCharacter(character: string, style: StyleKey) {
   if (style === "script") {
     return scriptFallback[character] ?? character;
@@ -180,6 +184,40 @@ export function stylizeText(text: string, style: StyleKey) {
 
   return Array.from(text)
     .map((character) => convertCharacter(character, style))
+    .join("");
+}
+
+function normalizeStyledCharacter(character: string) {
+  if (reverseFallbacks[character]) {
+    return reverseFallbacks[character];
+  }
+
+  const code = character.codePointAt(0);
+  if (!code) {
+    return character;
+  }
+
+  for (const offsets of Object.values(styleOffsets)) {
+    if (offsets.upper && code >= offsets.upper && code < offsets.upper + 26) {
+      return String.fromCharCode(65 + code - offsets.upper);
+    }
+
+    if (offsets.lower && code >= offsets.lower && code < offsets.lower + 26) {
+      return String.fromCharCode(97 + code - offsets.lower);
+    }
+
+    if (offsets.digit && code >= offsets.digit && code < offsets.digit + 10) {
+      return String.fromCharCode(48 + code - offsets.digit);
+    }
+  }
+
+  return character;
+}
+
+export function normalizeLinkedInText(text: string) {
+  return Array.from(cleanMarkdown(text))
+    .filter((character) => character !== "\u0332" && character !== "\u0336")
+    .map(normalizeStyledCharacter)
     .join("");
 }
 
