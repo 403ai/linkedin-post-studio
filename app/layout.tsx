@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'LinkedIn Tools',
+  title: 'LinkedIn Post Studio',
   description:
-    'Format AI-generated Markdown into copy-ready LinkedIn posts with Unicode styles, lists, previews, and character counts.',
+    'Write, format, preview, check, and copy LinkedIn posts from one focused workspace.',
 };
 
 export default function RootLayout({

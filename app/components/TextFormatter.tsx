@@ -272,7 +272,7 @@ export function TextFormatter() {
       </div>
 
       <div className="formatter-layout single">
-        <section className="compose-panel" aria-label="LinkedIn-safe text editor">
+        <section className="compose-panel" id="editor" aria-label="LinkedIn-safe text editor">
           {activeView === "write" && (
             <>
               <div className="format-toolbar" aria-label="Formatting toolbar">
@@ -413,7 +413,7 @@ export function TextFormatter() {
             </div>
           )}
 
-          <div className="stats-row editor-stats">
+          <div className="stats-row editor-stats" id="checks">
             <span>{checks.characters} characters</span>
             <span className={checks.remaining < 0 ? "limit-over" : ""}>
               {checks.remaining >= 0 ? checks.remaining : Math.abs(checks.remaining)} {checks.remaining >= 0 ? "left" : "over"}
