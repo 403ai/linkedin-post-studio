@@ -36,7 +36,6 @@ type ListFormat = "bullet" | "number" | "check";
 type FormatterView = "write" | "preview";
 type OpenPanel = "font" | "emoji" | null;
 type PreviewDevice = "desktop" | "mobile";
-type PreviewPostType = "text" | "media";
 
 const LINKEDIN_POST_LIMIT = 3000;
 const ICON_SIZE = 16;
@@ -69,7 +68,6 @@ export function TextFormatter() {
   const [copiedLabel, setCopiedLabel] = useState("");
   const [activeView, setActiveView] = useState<FormatterView>("write");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
-  const [previewPostType, setPreviewPostType] = useState<PreviewPostType>("text");
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [pasteStatus, setPasteStatus] = useState("");
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
@@ -399,22 +397,6 @@ export function TextFormatter() {
                     </button>
                   ))}
                 </div>
-                <div className="segmented-control small" aria-label="Preview post type">
-                  {(["text", "media"] as PreviewPostType[]).map((type) => (
-                    <button
-                      aria-pressed={previewPostType === type}
-                      className={previewPostType === type ? "active" : ""}
-                      key={type}
-                      onClick={() => {
-                        setPreviewPostType(type);
-                        setPreviewExpanded(false);
-                      }}
-                      type="button"
-                    >
-                      {type === "text" ? "text only" : "with image"}
-                    </button>
-                  ))}
-                </div>
               </div>
               <LinkedInPostCard
                 author="Forbidden AI"
@@ -426,8 +408,7 @@ export function TextFormatter() {
                 onToggleExpanded={() => setPreviewExpanded((expanded) => !expanded)}
                 postedAt="3h"
                 text={previewText}
-                truncateAt={previewDevice === "mobile" ? (previewPostType === "media" ? 100 : 140) : 210}
-                withMedia={previewPostType === "media"}
+                truncateAt={previewDevice === "mobile" ? 140 : 210}
               />
             </div>
           )}

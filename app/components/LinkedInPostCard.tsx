@@ -11,7 +11,6 @@ type LinkedInPostCardProps = {
   onToggleExpanded?: () => void;
   postedAt?: string;
   truncateAt?: number;
-  withMedia?: boolean;
 };
 
 function renderLinkedInText(text: string) {
@@ -39,9 +38,8 @@ export function LinkedInPostCard({
   onToggleExpanded,
   postedAt = "3h",
   truncateAt = 210,
-  withMedia = false,
 }: LinkedInPostCardProps) {
-  const hasMedia = withMedia || Boolean(imageUrl);
+  const hasMedia = Boolean(imageUrl);
   const lineCap = device === "mobile" ? 2 : 3;
   const rawText = text || "Your formatted post appears here.";
   const lineCount = rawText.split("\n").length;
