@@ -196,6 +196,101 @@ textarea:focus-visible {
 .studio-workspace {
   margin: 0 auto;
   max-width: 1180px;
+  padding-top: 32px;
+}
+
+.help-shell {
+  min-height: 100vh;
+  padding: 22px clamp(18px, 4vw, 56px) 56px;
+  background:
+    linear-gradient(135deg, rgba(10, 102, 194, 0.08), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f5f7f9 58%);
+}
+
+.help-heading,
+.help-section {
+  margin: 0 auto;
+  max-width: 980px;
+}
+
+.help-heading {
+  padding: 58px 0 20px;
+}
+
+.help-heading h1 {
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+}
+
+.help-heading p {
+  color: var(--graphite);
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  line-height: 1.6;
+  margin: 18px 0 0;
+  max-width: 760px;
+}
+
+.help-section {
+  display: grid;
+  gap: 18px;
+  padding-top: 34px;
+}
+
+.help-section h2,
+.help-card h2 {
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.help-grid,
+.help-section.two-column {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.help-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(39, 49, 58, 0.07);
+  padding: 20px;
+}
+
+.help-card h3 {
+  font-size: 1rem;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+}
+
+.help-card p,
+.help-card li {
+  color: var(--graphite);
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.help-card p {
+  margin: 0;
+}
+
+.help-card ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.help-card li::before {
+  color: var(--blue);
+  content: "•";
+  font-weight: 900;
+  margin-right: 8px;
 }
 
 .eyebrow {
@@ -1586,6 +1681,8 @@ pre {
   .format-grid,
   .tool-grid,
   .limits-columns,
+  .help-grid,
+  .help-section.two-column,
   .check-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1623,6 +1720,8 @@ pre {
   .format-grid,
   .tool-grid,
   .limits-columns,
+  .help-grid,
+  .help-section.two-column,
   .metric-board,
   .check-grid {
     grid-template-columns: 1fr;

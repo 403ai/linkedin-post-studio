@@ -6,12 +6,10 @@ export function SiteHeader() {
         LinkedIn Post Studio
       </a>
       <div className="nav-links">
-        <a href="/#studio">Studio</a>
-        <a href="/#editor">Editor</a>
-        <a href="/#checks">Checks</a>
+        <a href="/help">Help</a>
       </div>
       <div className="mobile-tool-link">
-        <a href="/#editor">Open studio</a>
+        <a href="/help">Help</a>
       </div>
     </nav>
   );
