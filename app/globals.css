@@ -442,6 +442,7 @@ button:hover,
   border-radius: 50%;
   color: #084a8f;
   display: inline-flex;
+  font-size: 0.84rem;
   font-weight: 900;
   height: 64px;
   justify-content: center;
@@ -496,7 +497,7 @@ button:hover,
   border-radius: 50%;
   color: #084a8f;
   display: inline-flex;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 900;
   height: 48px;
   justify-content: center;
@@ -505,6 +506,7 @@ button:hover,
 
 .linkedin-avatar.small {
   flex: 0 0 40px;
+  font-size: 0.62rem;
   height: 40px;
   width: 40px;
 }

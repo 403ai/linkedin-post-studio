@@ -399,14 +399,16 @@ export function TextFormatter() {
                 </div>
               </div>
               <LinkedInPostCard
+                author="Forbidden AI"
+                avatarLabel="403AI"
                 device={previewDevice}
                 expanded={previewExpanded}
                 imageUrl=""
-                meta="Growth at Typegrow | Helping you grow LinkedIn audience with AI"
+                meta="Build at 403ai.org | Built by AI - Overseen by Humans"
                 onToggleExpanded={() => setPreviewExpanded((expanded) => !expanded)}
+                postedAt="3h"
                 text={previewText}
                 truncateAt={previewDevice === "mobile" ? 140 : 210}
-                author="Alex Dahud"
               />
             </div>
           )}

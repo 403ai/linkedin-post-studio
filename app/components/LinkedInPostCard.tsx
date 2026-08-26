@@ -3,11 +3,13 @@ import { Globe2, MessageCircle, MoreHorizontal, Repeat2, Send, ThumbsUp } from "
 type LinkedInPostCardProps = {
   text: string;
   author?: string;
+  avatarLabel?: string;
   device?: "desktop" | "mobile";
   expanded?: boolean;
   imageUrl?: string;
   meta?: string;
   onToggleExpanded?: () => void;
+  postedAt?: string;
   truncateAt?: number;
 };
 
@@ -27,22 +29,18 @@ function renderLinkedInText(text: string) {
 
 export function LinkedInPostCard({
   text,
-  author = "Alex Dahud",
+  author = "Forbidden AI",
+  avatarLabel = "403AI",
   device = "desktop",
   expanded = true,
   imageUrl = "",
-  meta = "Growth at Typegrow | Helping you grow LinkedIn audience with AI",
+  meta = "Build at 403ai.org | Built by AI - Overseen by Humans",
   onToggleExpanded,
+  postedAt = "3h",
   truncateAt = 210,
 }: LinkedInPostCardProps) {
   const shouldTruncate = text.length > truncateAt;
   const displayText = !expanded && shouldTruncate ? text.slice(0, truncateAt).trimEnd() : text;
-  const initials = author
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
   return (
     <div className={`linkedin-preview-shell ${device}`} aria-label={`${device} LinkedIn feed preview`}>
@@ -50,7 +48,7 @@ export function LinkedInPostCard({
         <>
           <aside className="linkedin-sidebar left">
             <div className="sidebar-cover" />
-            <span className="sidebar-avatar">{initials}</span>
+            <span className="sidebar-avatar">{avatarLabel}</span>
             <strong>{author}</strong>
             <small>{meta}</small>
           </aside>
@@ -72,7 +70,7 @@ export function LinkedInPostCard({
 
       <article className={`linkedin-post-card ${device}`}>
         <header className="linkedin-post-header">
-          <span className="linkedin-avatar">{initials}</span>
+          <span className="linkedin-avatar">{avatarLabel}</span>
           <div className="linkedin-author-copy">
             <strong>
               {author}
@@ -80,7 +78,7 @@ export function LinkedInPostCard({
             </strong>
             <small>{meta}</small>
             <small className="linkedin-post-time">
-              12h • <Globe2 aria-hidden="true" size={12} />
+              {postedAt} • <Globe2 aria-hidden="true" size={12} />
             </small>
           </div>
           <button aria-label="Post options" className="linkedin-icon-button" type="button">
@@ -143,7 +141,7 @@ export function LinkedInPostCard({
 
       {device === "desktop" && (
         <div className="linkedin-start-post">
-          <span className="linkedin-avatar small">{initials}</span>
+          <span className="linkedin-avatar small">{avatarLabel}</span>
           <span>Start a post</span>
         </div>
       )}
