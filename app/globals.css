@@ -561,7 +561,7 @@ button:hover,
 }
 
 .linkedin-emoji-picker {
-  --epr-category-navigation-button-size: 32px;
+  --epr-category-navigation-button-size: 34px;
   --epr-emoji-size: 28px;
   --epr-header-padding: 10px;
   --epr-search-input-height: 38px;
@@ -569,14 +569,27 @@ button:hover,
 
 .linkedin-emoji-picker .epr-category-nav {
   border-bottom: 1px solid var(--line);
-  display: grid !important;
-  gap: 3px !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  padding: 8px 10px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  height: 48px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 7px 10px !important;
+  scrollbar-width: none;
+}
+
+.linkedin-emoji-picker .epr-category-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .linkedin-emoji-picker .epr-category-nav > button {
-  margin: 0 auto !important;
+  flex: 0 0 var(--epr-category-navigation-button-size) !important;
+  margin: 0 !important;
+}
+
+.linkedin-emoji-picker .epr-body {
+  padding-top: 4px;
 }
 
 .linkedin-editor {

@@ -337,7 +337,7 @@ export function TextFormatter() {
                     <div className="emoji-menu">
                       <EmojiPicker
                         className="linkedin-emoji-picker"
-                        emojiStyle={EmojiStyle.NATIVE}
+                        emojiStyle={EmojiStyle.TWITTER}
                         height={430}
                         lazyLoadEmojis
                         onEmojiClick={handleEmojiClick}
