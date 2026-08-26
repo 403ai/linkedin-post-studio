@@ -561,9 +561,30 @@ button:hover,
 }
 
 .linkedin-emoji-picker {
+  --epr-category-navigation-button-size: 32px;
   --epr-emoji-size: 28px;
   --epr-header-padding: 10px;
   --epr-search-input-height: 38px;
+}
+
+.linkedin-emoji-picker .epr-category-nav {
+  align-items: center;
+  min-height: 42px;
+  overflow: hidden;
+}
+
+.linkedin-emoji-picker .epr-category-nav button {
+  border: 0;
+  height: var(--epr-category-navigation-button-size) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  transform: none !important;
+  width: var(--epr-category-navigation-button-size) !important;
+}
+
+.linkedin-emoji-picker .epr-category-nav button:hover {
+  transform: none !important;
 }
 
 .linkedin-emoji-picker .epr-body {
