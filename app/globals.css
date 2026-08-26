@@ -689,7 +689,7 @@ button:hover,
   padding: 0 2px;
 }
 
-.linkedin-post-card.mobile .linkedin-actions span {
+.linkedin-post-card.mobile .linkedin-actions button span {
   font-size: 0.8rem;
 }
 
@@ -700,8 +700,10 @@ button:hover,
 }
 
 .linkedin-avatar.tiny {
-  font-size: 0.5rem;
+  flex: 0 0 28px;
+  font-size: 0.48rem;
   height: 28px;
+  line-height: 1;
   width: 28px;
 }
 
