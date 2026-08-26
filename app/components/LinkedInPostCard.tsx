@@ -1,4 +1,4 @@
-import { Globe2, MessageCircle, MoreHorizontal, Repeat2, Send, ThumbsUp } from "lucide-react";
+import { Globe2, Heart, MessageCircle, MoreHorizontal, PartyPopper, Repeat2, Send, ThumbsUp } from "lucide-react";
 
 type LinkedInPostCardProps = {
   text: string;
@@ -116,12 +116,18 @@ export function LinkedInPostCard({
 
         <div className="linkedin-social-proof">
           <span className="reaction-stack" aria-label="Reactions">
-            <span className="reaction-icon like">👍</span>
-            <span className="reaction-icon celebrate">👏</span>
-            <span className="reaction-icon love">❤️</span>
+            <span className="reaction-icon like" aria-label="Like">
+              <ThumbsUp aria-hidden="true" size={10} strokeWidth={3} />
+            </span>
+            <span className="reaction-icon celebrate" aria-label="Celebrate">
+              <PartyPopper aria-hidden="true" size={10} strokeWidth={2.7} />
+            </span>
+            <span className="reaction-icon love" aria-label="Love">
+              <Heart aria-hidden="true" fill="currentColor" size={10} strokeWidth={2.7} />
+            </span>
           </span>
-          <span>86</span>
-          <span className="linkedin-comment-count">3 comments • 1 repost</span>
+          <span>93</span>
+          <span className="linkedin-comment-count">4 comments • 3 reposts</span>
         </div>
 
         <div className="linkedin-actions" aria-label="Post actions">
