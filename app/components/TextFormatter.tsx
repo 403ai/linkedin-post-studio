@@ -428,7 +428,7 @@ export function TextFormatter() {
     <div className="formatter-stack">
       <div className="formatter-topline">
         <div className="segmented-control" aria-label="Formatter views">
-          {(["write", "preview"] as FormatterView[]).map((view) => (
+          {(["write", "preview", "assist"] as FormatterView[]).map((view) => (
             <button
               aria-pressed={activeView === view}
               className={activeView === view ? "active" : ""}
