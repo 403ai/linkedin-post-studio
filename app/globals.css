@@ -288,8 +288,10 @@ button:hover,
 
 .post-image-preview {
   border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-bottom: 16px;
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  margin-bottom: 0;
   max-height: 320px;
   overflow: hidden;
 }
@@ -298,6 +300,21 @@ button:hover,
   display: block;
   max-height: 320px;
   object-fit: cover;
+  width: 100%;
+}
+
+.post-image-placeholder {
+  align-items: center;
+  aspect-ratio: 1.91 / 1;
+  background:
+    linear-gradient(135deg, rgba(10, 102, 194, 0.18), transparent 42%),
+    linear-gradient(180deg, #f8fbff, #d9ecff);
+  color: #084a8f;
+  display: flex;
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 900;
+  justify-content: center;
+  letter-spacing: 0;
   width: 100%;
 }
 
@@ -549,13 +566,22 @@ button:hover,
   padding: 0;
 }
 
+.linkedin-post-text-wrap {
+  padding: 0 14px 10px;
+}
+
 .linkedin-post-text {
   color: #191919;
   font-size: 0.9rem;
   line-height: 1.45;
   margin: 8px 0 0;
-  padding: 0 14px 10px;
   white-space: pre-wrap;
+}
+
+.linkedin-post-text.collapsed {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
 }
 
 .linkedin-post-card.mobile .linkedin-post-text {
@@ -597,6 +623,18 @@ button:hover,
   width: 18px;
 }
 
+.reaction-icon.like {
+  background: #378fe9;
+}
+
+.reaction-icon.celebrate {
+  background: #6dae4f;
+}
+
+.reaction-icon.love {
+  background: #df704d;
+}
+
 .reaction-stack span:first-child {
   margin-left: 0;
 }
@@ -622,6 +660,10 @@ button:hover,
   padding: 0 6px;
 }
 
+.linkedin-action-avatar {
+  display: none;
+}
+
 .linkedin-actions button:hover,
 .linkedin-icon-button:hover {
   background: #f3f2f0;
@@ -631,6 +673,36 @@ button:hover,
 .linkedin-actions span {
   font-size: 0.86rem;
   font-weight: 700;
+}
+
+.linkedin-post-card.mobile .linkedin-actions {
+  align-items: center;
+  grid-template-columns: 40px repeat(4, minmax(0, 1fr));
+  padding: 4px 14px 8px;
+}
+
+.linkedin-post-card.mobile .linkedin-actions button {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-height: 48px;
+  padding: 0 2px;
+}
+
+.linkedin-post-card.mobile .linkedin-actions span {
+  font-size: 0.8rem;
+}
+
+.linkedin-action-avatar {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.linkedin-avatar.tiny {
+  font-size: 0.5rem;
+  height: 28px;
+  width: 28px;
 }
 
 .workspace,
@@ -968,6 +1040,8 @@ button:hover,
 
 .preview-device-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
   margin-bottom: 16px;
 }

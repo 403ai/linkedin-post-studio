@@ -11,6 +11,7 @@ type LinkedInPostCardProps = {
   onToggleExpanded?: () => void;
   postedAt?: string;
   truncateAt?: number;
+  withMedia?: boolean;
 };
 
 function renderLinkedInText(text: string) {
@@ -38,9 +39,13 @@ export function LinkedInPostCard({
   onToggleExpanded,
   postedAt = "3h",
   truncateAt = 210,
+  withMedia = false,
 }: LinkedInPostCardProps) {
-  const shouldTruncate = text.length > truncateAt;
-  const displayText = !expanded && shouldTruncate ? text.slice(0, truncateAt).trimEnd() : text;
+  const hasMedia = withMedia || Boolean(imageUrl);
+  const lineCap = device === "mobile" ? 2 : 3;
+  const rawText = text || "Your formatted post appears here.";
+  const lineCount = rawText.split("\n").length;
+  const shouldTruncate = rawText.length > truncateAt || lineCount > lineCap;
 
   return (
     <div className={`linkedin-preview-shell ${device}`} aria-label={`${device} LinkedIn feed preview`}>
@@ -86,54 +91,61 @@ export function LinkedInPostCard({
           </button>
         </header>
 
-        <p className="linkedin-post-text">
-          {renderLinkedInText(displayText || "Your formatted post appears here.")}
+        <div className="linkedin-post-text-wrap">
+          <p
+            className={!expanded && shouldTruncate ? "linkedin-post-text collapsed" : "linkedin-post-text"}
+            style={!expanded && shouldTruncate ? { WebkitLineClamp: lineCap } : undefined}
+          >
+            {renderLinkedInText(rawText)}
+          </p>
           {!expanded && shouldTruncate && (
-            <>
-              <span className="preview-fade">...</span>
-              <button className="more-link" onClick={onToggleExpanded} type="button">
-                more
-              </button>
-            </>
+            <button className="more-link" onClick={onToggleExpanded} type="button">
+              more
+            </button>
           )}
           {expanded && shouldTruncate && onToggleExpanded && (
             <button className="more-link less" onClick={onToggleExpanded} type="button">
               show less
             </button>
           )}
-        </p>
+        </div>
 
-        {imageUrl && (
+        {hasMedia && (
           <div className="post-image-preview">
-            <img alt="Post attachment preview" src={imageUrl} />
+            {imageUrl ? <img alt="Post attachment preview" src={imageUrl} /> : <div className="post-image-placeholder">403AI</div>}
           </div>
         )}
 
         <div className="linkedin-social-proof">
           <span className="reaction-stack" aria-label="Reactions">
-            <span>👍</span>
-            <span>❤️</span>
-            <span>💡</span>
+            <span className="reaction-icon like">👍</span>
+            <span className="reaction-icon celebrate">👏</span>
+            <span className="reaction-icon love">❤️</span>
           </span>
-          <span>92</span>
-          <span className="linkedin-comment-count">49 comments • 3 reposts</span>
+          <span>86</span>
+          <span className="linkedin-comment-count">3 comments • 1 repost</span>
         </div>
 
         <div className="linkedin-actions" aria-label="Post actions">
+          {device === "mobile" && (
+            <span className="linkedin-action-avatar">
+              <span className="linkedin-avatar tiny">{avatarLabel}</span>
+            </span>
+          )}
           <button type="button">
-            <ThumbsUp aria-hidden="true" size={20} />
+            <ThumbsUp aria-hidden="true" size={device === "mobile" ? 18 : 20} strokeWidth={1.9} />
             <span>Like</span>
           </button>
           <button type="button">
-            <MessageCircle aria-hidden="true" size={20} />
+            <MessageCircle aria-hidden="true" size={device === "mobile" ? 18 : 20} strokeWidth={1.9} />
             <span>Comment</span>
           </button>
           <button type="button">
-            <Repeat2 aria-hidden="true" size={20} />
+            <Repeat2 aria-hidden="true" size={device === "mobile" ? 18 : 20} strokeWidth={1.9} />
             <span>Repost</span>
           </button>
           <button type="button">
-            <Send aria-hidden="true" size={20} />
+            <Send aria-hidden="true" size={device === "mobile" ? 18 : 20} strokeWidth={1.9} />
             <span>Send</span>
           </button>
         </div>
