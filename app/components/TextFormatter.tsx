@@ -405,7 +405,7 @@ export function TextFormatter() {
                 meta="Growth at Typegrow | Helping you grow LinkedIn audience with AI"
                 onToggleExpanded={() => setPreviewExpanded((expanded) => !expanded)}
                 text={previewText}
-                truncateAt={previewDevice === "mobile" ? 135 : 210}
+                truncateAt={previewDevice === "mobile" ? 140 : 210}
                 author="Alex Dahud"
               />
             </div>
