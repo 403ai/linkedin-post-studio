@@ -1,0 +1,67 @@
+name: Bug report
+description: Report something that is broken or confusing.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve LinkedIn Post Studio. Please remove private drafts, API keys, and personal data before submitting.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+      placeholder: The formatter...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Tell us exactly how to trigger the issue.
+      placeholder: |
+        1. Go to...
+        2. Paste...
+        3. Click...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Formatter
+        - Preview
+        - Checks
+        - Emoji picker
+        - AI Assist
+        - Settings
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Chrome on macOS, Safari on iPhone, Firefox on Windows...
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or notes
+      description: Add screenshots if this is a visual issue.

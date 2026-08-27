@@ -3,6 +3,24 @@
   "version": "0.1.0",
   "private": false,
   "description": "Copy-ready LinkedIn formatting tools for AI-generated posts.",
+  "homepage": "https://linkedin-tools.sinisterpuppy.chatgpt.site",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/403ai/linkedin-post-studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/403ai/linkedin-post-studio/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "linkedin",
+    "linkedin-posts",
+    "markdown",
+    "formatter",
+    "unicode",
+    "content-creation",
+    "ai-writing"
+  ],
   "engines": {
     "node": ">=22.13.0"
   },

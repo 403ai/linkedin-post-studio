@@ -1,16 +1,18 @@
+import Link from "next/link";
+
 export function SiteHeader() {
   return (
     <nav className="topbar" aria-label="Primary">
-      <a className="brand" href="/" aria-label="LinkedIn Post Studio home">
+      <Link className="brand" href="/" aria-label="LinkedIn Post Studio home">
         <span className="brand-mark">in</span>
         LinkedIn Post Studio
-      </a>
+      </Link>
       <div className="nav-links">
-        <a href="/help">Help</a>
-        <a href="/settings">Settings</a>
+        <Link href="/help">Help</Link>
+        <Link href="/settings">Settings</Link>
       </div>
       <div className="mobile-tool-link">
-        <a href="/settings">Settings</a>
+        <Link href="/settings">Settings</Link>
       </div>
     </nav>
   );

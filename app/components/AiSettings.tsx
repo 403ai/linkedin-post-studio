@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AI_SETTINGS_STORAGE_KEY,
   createDefaultAiSettings,
@@ -9,35 +9,42 @@ import {
   type ProviderSettings,
 } from "../lib/aiSettings";
 
+function readStoredAiSettings() {
+  const defaults = createDefaultAiSettings();
+
+  if (typeof window === "undefined") {
+    return defaults;
+  }
+
+  const stored = window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY);
+  if (!stored) {
+    return defaults;
+  }
+
+  try {
+    const parsed = JSON.parse(stored) as AiSettingsState;
+    return {
+      ...defaults,
+      ...parsed,
+      providers: {
+        ...defaults.providers,
+        ...parsed.providers,
+      },
+    };
+  } catch {
+    window.localStorage.removeItem(AI_SETTINGS_STORAGE_KEY);
+    return defaults;
+  }
+}
+
 export function AiSettings() {
-  const [settings, setSettings] = useState(() => createDefaultAiSettings());
+  const [settings, setSettings] = useState(() => readStoredAiSettings());
   const [savedLabel, setSavedLabel] = useState("");
   const activeMeta = useMemo(
     () => providerMeta.find((provider) => provider.key === settings.activeProvider) ?? providerMeta[0],
     [settings.activeProvider],
   );
   const activeSettings = settings.providers[settings.activeProvider];
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY);
-    if (!stored) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(stored) as AiSettingsState;
-      setSettings({
-        ...createDefaultAiSettings(),
-        ...parsed,
-        providers: {
-          ...createDefaultAiSettings().providers,
-          ...parsed.providers,
-        },
-      });
-    } catch {
-      window.localStorage.removeItem(AI_SETTINGS_STORAGE_KEY);
-    }
-  }, []);
 
   function updateProviderSetting(field: keyof ProviderSettings, value: string) {
     setSettings((current) => ({

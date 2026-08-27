@@ -1,46 +1,92 @@
-# LinkedIn Tools
+# LinkedIn Post Studio
 
-Copy-ready tools for turning AI-generated drafts into polished LinkedIn posts.
+LinkedIn Post Studio is a copy-ready writing workspace for people who draft posts with AI, notes, or plain text and need the final version to work inside LinkedIn.
 
-## First tool: LinkedIn text formatter
+LinkedIn does not support Markdown formatting, custom font sizes, headings, colors, or arbitrary rich text in regular posts. This project converts common writing formats into LinkedIn-safe plain text, Unicode styles, readable spacing, and realistic post previews.
 
-LinkedIn post text does not support real Markdown, custom font sizes, headings,
-colors, or rich HTML. This app converts common AI-generated Markdown into plain
-text and Unicode characters that can be copied into LinkedIn.
+## Why This Exists
 
-Current features:
+AI tools often generate posts in Markdown. When that text is pasted into LinkedIn, the formatting usually breaks or shows raw Markdown syntax. This tool helps creators:
 
-- Markdown cleanup for headings, bold, italic, inline code, bullets, and spacing
-- Unicode styles including bold, italic, sans, script, doublestruck, fullwidth,
-  underline, and strikethrough
-- Copyable bullet, numbered, and checklist formats
-- LinkedIn-style post preview
-- Character, word, and line counts
+- Paste Markdown and get LinkedIn-safe text.
+- Format selected words or lines with Unicode styles.
+- Preview how a post will collapse behind LinkedIn's "more" behavior.
+- Check character count, words, lines, hashtags, mentions, and styled text usage.
+- Copy the final post as plain text that LinkedIn accepts.
 
-## Tool roadmap
+## Features
 
-The public tool set is grouped into four categories:
+- Smart Markdown paste conversion
+- Bold, italic, underline, strikethrough, sans, script, double-struck, and fullwidth Unicode styles
+- Bullet, numbered, and checklist formatting
+- Emoji picker
+- Undo, redo, and selected-text cleanup
+- Desktop and mobile LinkedIn-style preview
+- Character, word, line, hashtag, mention, and styled-character checks
+- Optional AI Assist panel for local Ollama or bring-your-own API key providers
 
-- Formatting and publishing: formatter, post preview, character counter,
-  Markdown cleanup
-- Writing helpers: post generator, hook generator, headline generator,
-  carousel outline generator
-- Discovery helpers: hashtag generator, idea bank, content angle finder
-- Media utilities: carousel generator and a carefully scoped video downloader
-  research item
+## Live Demo
 
-## Development
+[Open LinkedIn Post Studio](https://linkedin-tools.sinisterpuppy.chatgpt.site)
+
+## Tech Stack
+
+- React
+- Vinext
+- Next.js runtime APIs
+- TypeScript
+- CSS
+- OpenAI Sites hosting
+
+## Getting Started
+
+Requirements:
+
+- Node.js 22.13 or newer
+- pnpm
+
+Install dependencies:
 
 ```bash
 pnpm install
+```
+
+Start the local development server:
+
+```bash
 pnpm run dev
 ```
 
-Build:
+Build for production:
 
 ```bash
 pnpm run build
 ```
 
-This project was bootstrapped with the OpenAI Sites starter and uses Vinext,
-React, and Tailwind CSS.
+Run lint checks:
+
+```bash
+pnpm run lint
+```
+
+## Project Status
+
+The core formatter and preview workflow are usable. AI Assist exists, but active feature development is currently paused while the repository is prepared for public contribution.
+
+Good first contribution areas:
+
+- Improve accessibility and keyboard navigation.
+- Add tests for LinkedIn formatting utilities.
+- Improve documentation and examples.
+- Refine preview accuracy as LinkedIn UI changes.
+- Add more provider-safe AI Assist configuration options.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
+For bugs, feature requests, and documentation changes, use the issue templates in GitHub. For security concerns, please follow [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT License. See [LICENSE](LICENSE).

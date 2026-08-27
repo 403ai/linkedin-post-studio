@@ -207,7 +207,56 @@ function formatAssistHistoryDate(value: string) {
   });
 }
 
+function createDefaultAssistMemory(): AssistMemory {
+  return {
+    activeAction: "generatePost",
+    audience: "",
+    brief: "",
+    goal: "engagement",
+    length: "medium",
+    output: "",
+    outputsByAction: createEmptyAssistHistory(),
+    tone: "clear",
+    voice: "",
+  };
+}
+
+function readStoredAssistMemory() {
+  const defaults = createDefaultAssistMemory();
+
+  if (typeof window === "undefined") {
+    return defaults;
+  }
+
+  try {
+    const stored = window.localStorage.getItem(ASSIST_MEMORY_STORAGE_KEY);
+
+    if (!stored) {
+      return defaults;
+    }
+
+    const parsed = JSON.parse(stored) as Partial<AssistMemory>;
+
+    return {
+      ...defaults,
+      activeAction: isAssistAction(parsed.activeAction) ? parsed.activeAction : defaults.activeAction,
+      audience: typeof parsed.audience === "string" ? parsed.audience : defaults.audience,
+      brief: typeof parsed.brief === "string" ? parsed.brief : defaults.brief,
+      goal: typeof parsed.goal === "string" ? parsed.goal : defaults.goal,
+      length: typeof parsed.length === "string" ? parsed.length : defaults.length,
+      output: typeof parsed.output === "string" ? parsed.output : defaults.output,
+      outputsByAction: normalizeAssistHistory(parsed.outputsByAction),
+      tone: typeof parsed.tone === "string" ? parsed.tone : defaults.tone,
+      voice: typeof parsed.voice === "string" ? parsed.voice : defaults.voice,
+    };
+  } catch {
+    window.localStorage.removeItem(ASSIST_MEMORY_STORAGE_KEY);
+    return defaults;
+  }
+}
+
 export function TextFormatter() {
+  const [assistMemorySeed] = useState(() => readStoredAssistMemory());
   const [draft, setDraft] = useState(() => formatMarkdownInline(defaultDraft));
   const [history, setHistory] = useState<string[]>([]);
   const [future, setFuture] = useState<string[]>([]);
@@ -216,18 +265,17 @@ export function TextFormatter() {
   const [activeView, setActiveView] = useState<FormatterView>("write");
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const [previewExpanded, setPreviewExpanded] = useState(false);
-  const [activeAssist, setActiveAssist] = useState<AssistActionKey>("generatePost");
-  const [assistAudience, setAssistAudience] = useState("");
-  const [assistBrief, setAssistBrief] = useState("");
-  const [assistGoal, setAssistGoal] = useState("engagement");
-  const [assistLength, setAssistLength] = useState("medium");
-  const [assistTone, setAssistTone] = useState("clear");
-  const [assistVoice, setAssistVoice] = useState("");
-  const [assistOutput, setAssistOutput] = useState("");
+  const [activeAssist, setActiveAssist] = useState<AssistActionKey>(assistMemorySeed.activeAction);
+  const [assistAudience, setAssistAudience] = useState(assistMemorySeed.audience);
+  const [assistBrief, setAssistBrief] = useState(assistMemorySeed.brief);
+  const [assistGoal, setAssistGoal] = useState(assistMemorySeed.goal);
+  const [assistLength, setAssistLength] = useState(assistMemorySeed.length);
+  const [assistTone, setAssistTone] = useState(assistMemorySeed.tone);
+  const [assistVoice, setAssistVoice] = useState(assistMemorySeed.voice);
+  const [assistOutput, setAssistOutput] = useState(assistMemorySeed.output);
   const [assistError, setAssistError] = useState("");
   const [assistLoading, setAssistLoading] = useState(false);
-  const [assistHistory, setAssistHistory] = useState<AssistHistory>(() => createEmptyAssistHistory());
-  const [assistMemoryReady, setAssistMemoryReady] = useState(false);
+  const [assistHistory, setAssistHistory] = useState<AssistHistory>(assistMemorySeed.outputsByAction);
   const [storedSelection, setStoredSelection] = useState({ start: 0, end: 0 });
   const [pasteStatus, setPasteStatus] = useState("");
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
@@ -262,40 +310,6 @@ export function TextFormatter() {
   }, [previewText]);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(ASSIST_MEMORY_STORAGE_KEY);
-
-      if (!stored) {
-        return;
-      }
-
-      const parsed = JSON.parse(stored) as Partial<AssistMemory>;
-      const restoredHistory = normalizeAssistHistory(parsed.outputsByAction);
-
-      if (isAssistAction(parsed.activeAction)) {
-        setActiveAssist(parsed.activeAction);
-      }
-
-      setAssistAudience(typeof parsed.audience === "string" ? parsed.audience : "");
-      setAssistBrief(typeof parsed.brief === "string" ? parsed.brief : "");
-      setAssistGoal(typeof parsed.goal === "string" ? parsed.goal : "engagement");
-      setAssistLength(typeof parsed.length === "string" ? parsed.length : "medium");
-      setAssistTone(typeof parsed.tone === "string" ? parsed.tone : "clear");
-      setAssistVoice(typeof parsed.voice === "string" ? parsed.voice : "");
-      setAssistOutput(typeof parsed.output === "string" ? parsed.output : "");
-      setAssistHistory(restoredHistory);
-    } catch {
-      window.localStorage.removeItem(ASSIST_MEMORY_STORAGE_KEY);
-    } finally {
-      setAssistMemoryReady(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!assistMemoryReady) {
-      return;
-    }
-
     const memory: AssistMemory = {
       activeAction: activeAssist,
       audience: assistAudience,
@@ -316,7 +330,6 @@ export function TextFormatter() {
     assistGoal,
     assistHistory,
     assistLength,
-    assistMemoryReady,
     assistOutput,
     assistTone,
     assistVoice,
