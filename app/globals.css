@@ -38,6 +38,7 @@ body {
 button,
 textarea,
 select,
+input,
 a {
   font: inherit;
 }
@@ -50,7 +51,8 @@ a {
 button:focus-visible,
 a:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
+select:focus-visible,
+input:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--blue) 40%, transparent);
   outline-offset: 3px;
 }
@@ -293,6 +295,132 @@ select:focus-visible {
   content: "•";
   font-weight: 900;
   margin-right: 8px;
+}
+
+.settings-layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(240px, 330px) minmax(0, 1fr);
+  margin: 34px auto 0;
+  max-width: 980px;
+}
+
+.settings-provider-list,
+.settings-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(39, 49, 58, 0.07);
+}
+
+.settings-provider-list {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.settings-provider {
+  align-items: start;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  justify-content: stretch;
+  min-height: 62px;
+  padding: 10px;
+  text-align: left;
+}
+
+.settings-provider:hover,
+.settings-provider.active {
+  background: #f3f7fb;
+  border-color: #d7e5f3;
+  transform: none;
+}
+
+.settings-provider span {
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.settings-provider small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.settings-panel {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.settings-panel-heading {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.settings-panel-heading h2 {
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  letter-spacing: 0;
+  line-height: 1.08;
+  margin: 0;
+}
+
+.settings-note {
+  background: #fbfcfd;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.settings-note strong {
+  color: var(--ink);
+}
+
+.settings-note span {
+  color: var(--graphite);
+  line-height: 1.5;
+}
+
+.settings-field {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-field span {
+  color: var(--graphite);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.settings-field input {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.settings-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-save-button {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #ffffff;
 }
 
 .eyebrow {
@@ -1870,6 +1998,7 @@ pre {
   .hero-grid,
   .studio-heading,
   .assist-grid,
+  .settings-layout,
   .editor-grid,
   .formatter-layout,
   .limits,

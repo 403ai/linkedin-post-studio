@@ -18,6 +18,10 @@ const workflows = [
     body: "Open Assist to generate a starting post, improve a draft, create hooks, shorten text, suggest hashtags, or write a CTA. Review the result before replacing, inserting, appending, or copying it.",
   },
   {
+    title: "Choose an AI provider",
+    body: "Open Settings to prepare local Ollama or add your own provider API key. Settings are stored in your browser and will be used by Assist when AI calls are connected.",
+  },
+  {
     title: "Copy the final post",
     body: "Use Copy post when the draft is ready. The copied result is plain text with LinkedIn-safe spacing, lists, emoji, hashtags, mentions, and Unicode formatting.",
   },
@@ -30,6 +34,7 @@ const features = [
   "Emoji picker, lists, numbered lists, checklists, undo, redo, and clear styling",
   "Desktop and mobile LinkedIn-style preview",
   "Assist actions for post ideas, hook options, hashtags, shorteners, tone rewrites, and CTAs",
+  "Settings for Ollama, OpenAI, Anthropic, Gemini, Groq, Mistral, and OpenRouter",
   "Character count, remaining limit, words, lines, hashtags, mentions, and styled-character checks",
 ];
 

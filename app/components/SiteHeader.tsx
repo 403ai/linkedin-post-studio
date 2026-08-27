@@ -7,9 +7,10 @@ export function SiteHeader() {
       </a>
       <div className="nav-links">
         <a href="/help">Help</a>
+        <a href="/settings">Settings</a>
       </div>
       <div className="mobile-tool-link">
-        <a href="/help">Help</a>
+        <a href="/settings">Settings</a>
       </div>
     </nav>
   );
