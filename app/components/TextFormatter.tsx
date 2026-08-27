@@ -31,23 +31,14 @@ import {
   StyleKey,
   stylizeText,
 } from "../lib/linkedinFormatting";
+import { AI_SETTINGS_STORAGE_KEY, createDefaultAiSettings, type AiSettingsState } from "../lib/aiSettings";
+import type { AssistActionKey } from "../lib/assistPrompts";
 import { LinkedInPostCard } from "./LinkedInPostCard";
 
 type ListFormat = "bullet" | "number" | "check";
 type FormatterView = "write" | "preview" | "assist";
 type OpenPanel = "font" | "emoji" | null;
 type PreviewDevice = "desktop" | "mobile";
-type AssistActionKey =
-  | "generatePost"
-  | "turnNotes"
-  | "improvePost"
-  | "shortenPost"
-  | "professional"
-  | "conversational"
-  | "generateHooks"
-  | "improveHook"
-  | "hashtags"
-  | "cta";
 
 const LINKEDIN_POST_LIMIT = 3000;
 const ICON_SIZE = 16;
@@ -118,13 +109,7 @@ const assistGroups: {
   },
 ];
 
-const assistActionLabels = new Map(
-  assistGroups.flatMap((group) => group.actions.map((action) => [action.key, action.label] as const)),
-);
-
-function firstLine(text: string) {
-  return text.split("\n").find((line) => line.trim())?.trim() ?? "";
-}
+const assistActionLabels = new Map(assistGroups.flatMap((group) => group.actions.map((action) => [action.key, action.label] as const)));
 
 export function TextFormatter() {
   const [draft, setDraft] = useState(() => formatMarkdownInline(defaultDraft));
@@ -136,9 +121,15 @@ export function TextFormatter() {
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [activeAssist, setActiveAssist] = useState<AssistActionKey>("generatePost");
+  const [assistAudience, setAssistAudience] = useState("");
   const [assistBrief, setAssistBrief] = useState("");
+  const [assistGoal, setAssistGoal] = useState("engagement");
+  const [assistLength, setAssistLength] = useState("medium");
   const [assistTone, setAssistTone] = useState("clear");
+  const [assistVoice, setAssistVoice] = useState("");
   const [assistOutput, setAssistOutput] = useState("");
+  const [assistError, setAssistError] = useState("");
+  const [assistLoading, setAssistLoading] = useState(false);
   const [storedSelection, setStoredSelection] = useState({ start: 0, end: 0 });
   const [pasteStatus, setPasteStatus] = useState("");
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
@@ -331,62 +322,73 @@ export function TextFormatter() {
     showPasteStatus("Markdown converted");
   }
 
-  function buildAssistOutput(action: AssistActionKey) {
-    const source = previewText.trim();
-    const idea = assistBrief.trim();
-    const seed = idea || source || "Share one practical lesson from recent work";
-    const toneNote = assistTone === "clear" ? "clear and useful" : assistTone;
-    const hook = firstLine(source) || "Most people make LinkedIn posts harder than they need to be.";
+  function readAiSettings() {
+    const defaults = createDefaultAiSettings();
 
-    switch (action) {
-      case "generatePost":
-        return `${seed}\n\nHere is the ${toneNote} version:\n\n• Start with the problem people already feel\n• Share the lesson in plain language\n• Give one practical next step\n\nThe best LinkedIn posts do not need to sound bigger than the idea. They need to make the idea easier to use.\n\nWhat would you add from your own experience?`;
-      case "turnNotes":
-        return `I kept coming back to this idea:\n\n${seed}\n\nThe useful part is not the theory. It is what changes when someone applies it.\n\nA stronger post usually has three pieces:\n\n1. A clear problem\n2. A specific lesson\n3. A next step people can try today\n\nThat structure makes the post easier to read, easier to remember, and easier to act on.`;
-      case "improvePost":
-        return source
-          ? `${source}\n\nThe sharper version:\n\nMake the opening more specific. Keep the middle focused on one lesson. End with a question that invites real replies.`
-          : `Start with one specific observation.\n\nExplain why it matters.\n\nGive the reader one practical takeaway.\n\nThen end with a question that makes replying easy.`;
-      case "shortenPost":
-        return source
-          ? source
-              .split("\n")
-              .filter((line) => line.trim())
-              .slice(0, 5)
-              .join("\n\n")
-          : `One idea. One lesson. One next step.\n\nThat is usually enough for a strong LinkedIn post.`;
-      case "professional":
-        return source
-          ? `Professional rewrite:\n\n${source}\n\nKey takeaway: clarity, structure, and restraint make the post easier to trust.`
-          : `Professional rewrite:\n\nA clear LinkedIn post should explain the context, name the insight, and give the reader one practical action to take next.`;
-      case "conversational":
-        return source
-          ? `Conversational rewrite:\n\n${source}\n\nThat is the part I think more people should talk about.`
-          : `I used to overthink LinkedIn posts.\n\nNow I try to keep it simpler: one useful idea, written like I would explain it to a real person.`;
-      case "generateHooks":
-        return [
-          hook,
-          "A LinkedIn post gets easier when you stop trying to include everything.",
-          "The first line has one job: make the next line worth reading.",
-          "Most AI-generated posts fail for the same reason: they sound finished before they sound human.",
-          "If your post feels too long, the problem is usually structure, not length.",
-        ].join("\n");
-      case "improveHook":
-        return hook
-          ? `Original: ${hook}\n\nOptions:\n\n1. ${hook.replace(/\.$/, "")}, but here is the part most people miss.\n2. I used to think this was complicated. It is not.\n3. The simplest version of this lesson changed how I write LinkedIn posts.`
-          : `Options:\n\n1. Most LinkedIn posts become stronger when the first line gets simpler.\n2. The hook is not decoration. It is the doorway into the idea.\n3. If the first line is vague, the rest of the post has to work too hard.`;
-      case "hashtags":
-        return "#LinkedInCreator #ContentCreation #PersonalBranding #WritingTips #AIWorkflow";
-      case "cta":
-        return "What is one thing you would change before publishing this?";
-      default:
-        return seed;
+    try {
+      const stored = window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY);
+      if (!stored) {
+        return defaults;
+      }
+
+      const parsed = JSON.parse(stored) as AiSettingsState;
+      return {
+        ...defaults,
+        ...parsed,
+        providers: {
+          ...defaults.providers,
+          ...parsed.providers,
+        },
+      };
+    } catch {
+      return defaults;
     }
   }
 
-  function generateAssistDraft() {
+  async function generateAssistDraft() {
     closePanel();
-    setAssistOutput(buildAssistOutput(activeAssist));
+    setAssistError("");
+    setAssistLoading(true);
+
+    const settings = readAiSettings();
+    const providerSettings = settings.providers[settings.activeProvider];
+    const enrichedBrief = [
+      assistBrief.trim(),
+      assistAudience.trim() ? `Audience: ${assistAudience.trim()}` : "",
+      `Goal: ${assistGoal}`,
+      `Length: ${assistLength}`,
+      assistVoice.trim() ? `Voice notes: ${assistVoice.trim()}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      const response = await fetch("/api/assist", {
+        body: JSON.stringify({
+          action: activeAssist,
+          brief: enrichedBrief,
+          currentPost: previewText,
+          provider: settings.activeProvider,
+          providerSettings,
+          tone: assistTone,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+      const data = (await response.json()) as { error?: string; output?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI generation failed.");
+      }
+
+      setAssistOutput(data.output ?? "");
+    } catch (error) {
+      setAssistError(error instanceof Error ? error.message : "AI generation failed.");
+    } finally {
+      setAssistLoading(false);
+    }
   }
 
   function replaceWithAssistOutput() {
@@ -606,6 +608,7 @@ export function TextFormatter() {
                             onClick={() => {
                               setActiveAssist(action.key);
                               setAssistOutput("");
+                              setAssistError("");
                             }}
                             type="button"
                           >
@@ -638,6 +641,36 @@ export function TextFormatter() {
                     />
                   </label>
 
+                  <div className="assist-control-grid">
+                    <label className="assist-field">
+                      <span>Audience</span>
+                      <input
+                        onChange={(event) => setAssistAudience(event.target.value)}
+                        placeholder="Founders, job seekers, engineers..."
+                        type="text"
+                        value={assistAudience}
+                      />
+                    </label>
+                    <label className="assist-field">
+                      <span>Goal</span>
+                      <select onChange={(event) => setAssistGoal(event.target.value)} value={assistGoal}>
+                        <option value="engagement">Engagement</option>
+                        <option value="education">Education</option>
+                        <option value="authority">Authority</option>
+                        <option value="storytelling">Storytelling</option>
+                        <option value="lead generation">Lead generation</option>
+                      </select>
+                    </label>
+                    <label className="assist-field">
+                      <span>Length</span>
+                      <select onChange={(event) => setAssistLength(event.target.value)} value={assistLength}>
+                        <option value="short">Short</option>
+                        <option value="medium">Medium</option>
+                        <option value="long">Long</option>
+                      </select>
+                    </label>
+                  </div>
+
                   <div className="assist-controls">
                     <label className="assist-field compact">
                       <span>Tone</span>
@@ -648,33 +681,52 @@ export function TextFormatter() {
                         <option value="direct">Direct</option>
                       </select>
                     </label>
-                    <button className="generate-assist-button" onClick={generateAssistDraft} type="button">
-                      Generate draft
+                    <label className="assist-field compact wide">
+                      <span>Voice notes</span>
+                      <input
+                        onChange={(event) => setAssistVoice(event.target.value)}
+                        placeholder="Founder-led, technical, plainspoken..."
+                        type="text"
+                        value={assistVoice}
+                      />
+                    </label>
+                    <button className="generate-assist-button" disabled={assistLoading} onClick={generateAssistDraft} type="button">
+                      {assistLoading ? "Generating..." : "Generate draft"}
                     </button>
                   </div>
 
                   <div className="assist-output" aria-live="polite">
-                    {assistOutput ? (
+                    {assistError ? (
+                      <div className="assist-empty error">
+                        <strong>Generation failed.</strong>
+                        <span>{assistError}</span>
+                      </div>
+                    ) : assistLoading ? (
+                      <div className="assist-empty">
+                        <strong>Generating draft...</strong>
+                        <span>The selected provider is writing a LinkedIn-ready response.</span>
+                      </div>
+                    ) : assistOutput ? (
                       <pre>{assistOutput}</pre>
                     ) : (
                       <div className="assist-empty">
                         <strong>Generated text will appear here.</strong>
-                        <span>The current version uses local sample output while we prepare the AI integration.</span>
+                        <span>Choose an action, confirm your provider in Settings, and generate a draft.</span>
                       </div>
                     )}
                   </div>
 
                   <div className="assist-apply-row">
-                    <button disabled={!assistOutput} onClick={replaceWithAssistOutput} type="button">
+                    <button disabled={!assistOutput || assistLoading} onClick={replaceWithAssistOutput} type="button">
                       Replace post
                     </button>
-                    <button disabled={!assistOutput} onClick={insertAssistOutput} type="button">
+                    <button disabled={!assistOutput || assistLoading} onClick={insertAssistOutput} type="button">
                       Insert at cursor
                     </button>
-                    <button disabled={!assistOutput} onClick={appendAssistOutput} type="button">
+                    <button disabled={!assistOutput || assistLoading} onClick={appendAssistOutput} type="button">
                       Append
                     </button>
-                    <button disabled={!assistOutput} onClick={() => copyText(assistOutput, "assist")} type="button">
+                    <button disabled={!assistOutput || assistLoading} onClick={() => copyText(assistOutput, "assist")} type="button">
                       {copiedLabel === "assist" ? "Copied" : "Copy"}
                     </button>
                   </div>

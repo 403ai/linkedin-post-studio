@@ -1456,7 +1456,8 @@ button:hover,
 }
 
 .assist-field textarea,
-.assist-field select {
+.assist-field select,
+.assist-field input {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1475,6 +1476,17 @@ button:hover,
   padding: 0 10px;
 }
 
+.assist-field input {
+  min-height: 42px;
+  padding: 0 10px;
+}
+
+.assist-control-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.55fr) minmax(130px, 0.45fr);
+}
+
 .assist-controls,
 .assist-apply-row {
   align-items: end;
@@ -1485,6 +1497,10 @@ button:hover,
 
 .assist-field.compact {
   min-width: 190px;
+}
+
+.assist-field.compact.wide {
+  flex: 1 1 260px;
 }
 
 .generate-assist-button {

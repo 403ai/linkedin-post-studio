@@ -1,106 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
-type ProviderKey = "ollama" | "openai" | "anthropic" | "google" | "groq" | "mistral" | "openrouter";
-
-type ProviderSettings = {
-  apiKey: string;
-  baseUrl: string;
-  model: string;
-};
-
-type AiSettingsState = {
-  activeProvider: ProviderKey;
-  providers: Record<ProviderKey, ProviderSettings>;
-};
-
-const STORAGE_KEY = "linkedin-post-studio-ai-settings";
-
-const providerMeta: {
-  key: ProviderKey;
-  name: string;
-  description: string;
-  defaultBaseUrl: string;
-  defaultModel: string;
-  needsApiKey: boolean;
-}[] = [
-  {
-    key: "ollama",
-    name: "Ollama",
-    description: "Use a local model running on your machine.",
-    defaultBaseUrl: "http://localhost:11434",
-    defaultModel: "llama3.1",
-    needsApiKey: false,
-  },
-  {
-    key: "openai",
-    name: "OpenAI",
-    description: "Use your own OpenAI API key.",
-    defaultBaseUrl: "https://api.openai.com/v1",
-    defaultModel: "gpt-4.1-mini",
-    needsApiKey: true,
-  },
-  {
-    key: "anthropic",
-    name: "Anthropic",
-    description: "Use your own Anthropic API key.",
-    defaultBaseUrl: "https://api.anthropic.com",
-    defaultModel: "claude-sonnet-4-5",
-    needsApiKey: true,
-  },
-  {
-    key: "google",
-    name: "Google Gemini",
-    description: "Use your own Google AI Studio key.",
-    defaultBaseUrl: "https://generativelanguage.googleapis.com",
-    defaultModel: "gemini-2.5-flash",
-    needsApiKey: true,
-  },
-  {
-    key: "groq",
-    name: "Groq",
-    description: "Use Groq-hosted open models.",
-    defaultBaseUrl: "https://api.groq.com/openai/v1",
-    defaultModel: "llama-3.3-70b-versatile",
-    needsApiKey: true,
-  },
-  {
-    key: "mistral",
-    name: "Mistral",
-    description: "Use your own Mistral API key.",
-    defaultBaseUrl: "https://api.mistral.ai/v1",
-    defaultModel: "mistral-small-latest",
-    needsApiKey: true,
-  },
-  {
-    key: "openrouter",
-    name: "OpenRouter",
-    description: "Use one key for many compatible models.",
-    defaultBaseUrl: "https://openrouter.ai/api/v1",
-    defaultModel: "openai/gpt-4.1-mini",
-    needsApiKey: true,
-  },
-];
-
-function createDefaultSettings(): AiSettingsState {
-  return {
-    activeProvider: "ollama",
-    providers: Object.fromEntries(
-      providerMeta.map((provider) => [
-        provider.key,
-        {
-          apiKey: "",
-          baseUrl: provider.defaultBaseUrl,
-          model: provider.defaultModel,
-        },
-      ]),
-    ) as Record<ProviderKey, ProviderSettings>,
-  };
-}
+import {
+  AI_SETTINGS_STORAGE_KEY,
+  createDefaultAiSettings,
+  providerMeta,
+  type AiSettingsState,
+  type ProviderSettings,
+} from "../lib/aiSettings";
 
 export function AiSettings() {
-  const [settings, setSettings] = useState<AiSettingsState>(() => createDefaultSettings());
+  const [settings, setSettings] = useState(() => createDefaultAiSettings());
   const [savedLabel, setSavedLabel] = useState("");
   const activeMeta = useMemo(
     () => providerMeta.find((provider) => provider.key === settings.activeProvider) ?? providerMeta[0],
@@ -109,7 +19,7 @@ export function AiSettings() {
   const activeSettings = settings.providers[settings.activeProvider];
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    const stored = window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY);
     if (!stored) {
       return;
     }
@@ -117,15 +27,15 @@ export function AiSettings() {
     try {
       const parsed = JSON.parse(stored) as AiSettingsState;
       setSettings({
-        ...createDefaultSettings(),
+        ...createDefaultAiSettings(),
         ...parsed,
         providers: {
-          ...createDefaultSettings().providers,
+          ...createDefaultAiSettings().providers,
           ...parsed.providers,
         },
       });
     } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(AI_SETTINGS_STORAGE_KEY);
     }
   }, []);
 
@@ -143,15 +53,15 @@ export function AiSettings() {
   }
 
   function saveSettings() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    window.localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
     setSavedLabel("Settings saved");
     window.setTimeout(() => setSavedLabel(""), 1800);
   }
 
   function resetSettings() {
-    const defaults = createDefaultSettings();
+    const defaults = createDefaultAiSettings();
     setSettings(defaults);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+    window.localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(defaults));
     setSavedLabel("Settings reset");
     window.setTimeout(() => setSavedLabel(""), 1800);
   }
@@ -187,7 +97,7 @@ export function AiSettings() {
         <div className="settings-note">
           <strong>Stored in this browser only.</strong>
           <span>
-            These settings are saved locally on your device. Do not use a shared browser for personal API keys.
+            These settings are saved locally on your device. When you generate, the selected provider settings are sent to the app backend for that request.
           </span>
         </div>
 
@@ -228,7 +138,7 @@ export function AiSettings() {
           <div className="settings-note">
             <strong>Ollama setup</strong>
             <span>
-              Start Ollama locally, pull a model, and keep the base URL pointed at your Ollama server.
+              Start Ollama locally, pull a model, and keep the base URL pointed at your Ollama server. Ollama works best when the studio is also running locally.
             </span>
           </div>
         )}

@@ -12,7 +12,7 @@ export default function SettingsPage() {
           <h1>Choose how Assist will generate posts.</h1>
           <p>
             Connect the studio to a local Ollama model or prepare your own API key for a hosted provider.
-            These settings will power the Assist tab once the AI generation endpoint is connected.
+            These settings power the Assist tab when you generate a post, hook, hashtag set, or rewrite.
           </p>
         </div>
 

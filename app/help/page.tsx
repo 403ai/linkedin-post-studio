@@ -15,11 +15,11 @@ const workflows = [
   },
   {
     title: "Use Assist when you need options",
-    body: "Open Assist to generate a starting post, improve a draft, create hooks, shorten text, suggest hashtags, or write a CTA. Review the result before replacing, inserting, appending, or copying it.",
+    body: "Open Assist to generate a starting post, improve a draft, create hooks, shorten text, suggest hashtags, or write a CTA. Set audience, goal, length, tone, and voice notes, then review the result before replacing, inserting, appending, or copying it.",
   },
   {
     title: "Choose an AI provider",
-    body: "Open Settings to prepare local Ollama or add your own provider API key. Settings are stored in your browser and will be used by Assist when AI calls are connected.",
+    body: "Open Settings to prepare local Ollama or add your own provider API key. Settings are stored in your browser and used when Assist generates a response.",
   },
   {
     title: "Copy the final post",
