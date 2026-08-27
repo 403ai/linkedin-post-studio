@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardEvent, useMemo, useRef, useState } from "react";
+import { ClipboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import {
   Bold,
@@ -32,7 +32,7 @@ import {
   stylizeText,
 } from "../lib/linkedinFormatting";
 import { AI_SETTINGS_STORAGE_KEY, createDefaultAiSettings, type AiSettingsState } from "../lib/aiSettings";
-import type { AssistActionKey } from "../lib/assistPrompts";
+import { isAssistAction, type AssistActionKey } from "../lib/assistPrompts";
 import { LinkedInPostCard } from "./LinkedInPostCard";
 
 type ListFormat = "bullet" | "number" | "check";
@@ -42,6 +42,31 @@ type PreviewDevice = "desktop" | "mobile";
 
 const LINKEDIN_POST_LIMIT = 3000;
 const ICON_SIZE = 16;
+const ASSIST_MEMORY_STORAGE_KEY = "linkedin-post-studio-assist-memory";
+const ASSIST_HISTORY_LIMIT = 5;
+
+type AssistGeneration = {
+  action: AssistActionKey;
+  createdAt: string;
+  id: string;
+  inputSummary: string;
+  output: string;
+  tone: string;
+};
+
+type AssistHistory = Record<AssistActionKey, AssistGeneration[]>;
+
+type AssistMemory = {
+  activeAction: AssistActionKey;
+  audience: string;
+  brief: string;
+  goal: string;
+  length: string;
+  output: string;
+  outputsByAction: AssistHistory;
+  tone: string;
+  voice: string;
+};
 
 const toolbarStyles: { key: StyleKey; Icon: LucideIcon; title: string }[] = [
   { key: "bold", Icon: Bold, title: "Bold selected text" },
@@ -110,6 +135,77 @@ const assistGroups: {
 ];
 
 const assistActionLabels = new Map(assistGroups.flatMap((group) => group.actions.map((action) => [action.key, action.label] as const)));
+const assistActions = assistGroups.flatMap((group) => group.actions);
+
+function createEmptyAssistHistory(): AssistHistory {
+  return Object.fromEntries(assistActions.map((action) => [action.key, []])) as AssistHistory;
+}
+
+function normalizeAssistHistory(value: unknown): AssistHistory {
+  const nextHistory = createEmptyAssistHistory();
+
+  if (!value || typeof value !== "object") {
+    return nextHistory;
+  }
+
+  for (const action of assistActions) {
+    const items = (value as Partial<AssistHistory>)[action.key];
+
+    if (!Array.isArray(items)) {
+      continue;
+    }
+
+    nextHistory[action.key] = items
+      .filter((item): item is AssistGeneration => {
+        return Boolean(
+          item &&
+            typeof item === "object" &&
+            typeof item.id === "string" &&
+            typeof item.createdAt === "string" &&
+            typeof item.inputSummary === "string" &&
+            typeof item.output === "string" &&
+            typeof item.tone === "string" &&
+            isAssistAction(item.action),
+        );
+      })
+      .slice(0, ASSIST_HISTORY_LIMIT);
+  }
+
+  return nextHistory;
+}
+
+function summarizeAssistInput({
+  audience,
+  brief,
+  currentPost,
+  goal,
+}: {
+  audience: string;
+  brief: string;
+  currentPost: string;
+  goal: string;
+}) {
+  const source = brief.trim() || currentPost.trim() || "Current post";
+  const compactSource = source.replace(/\s+/g, " ").slice(0, 82);
+  const audienceLabel = audience.trim() ? ` for ${audience.trim().slice(0, 32)}` : "";
+
+  return `${compactSource}${source.length > 82 ? "..." : ""}${audienceLabel} · ${goal}`;
+}
+
+function formatAssistHistoryDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Saved generation";
+  }
+
+  return date.toLocaleString(undefined, {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+  });
+}
 
 export function TextFormatter() {
   const [draft, setDraft] = useState(() => formatMarkdownInline(defaultDraft));
@@ -130,6 +226,8 @@ export function TextFormatter() {
   const [assistOutput, setAssistOutput] = useState("");
   const [assistError, setAssistError] = useState("");
   const [assistLoading, setAssistLoading] = useState(false);
+  const [assistHistory, setAssistHistory] = useState<AssistHistory>(() => createEmptyAssistHistory());
+  const [assistMemoryReady, setAssistMemoryReady] = useState(false);
   const [storedSelection, setStoredSelection] = useState({ start: 0, end: 0 });
   const [pasteStatus, setPasteStatus] = useState("");
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
@@ -162,6 +260,67 @@ export function TextFormatter() {
       limitPercent: Math.min(100, Math.round((previewText.length / LINKEDIN_POST_LIMIT) * 100)),
     };
   }, [previewText]);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(ASSIST_MEMORY_STORAGE_KEY);
+
+      if (!stored) {
+        return;
+      }
+
+      const parsed = JSON.parse(stored) as Partial<AssistMemory>;
+      const restoredHistory = normalizeAssistHistory(parsed.outputsByAction);
+
+      if (isAssistAction(parsed.activeAction)) {
+        setActiveAssist(parsed.activeAction);
+      }
+
+      setAssistAudience(typeof parsed.audience === "string" ? parsed.audience : "");
+      setAssistBrief(typeof parsed.brief === "string" ? parsed.brief : "");
+      setAssistGoal(typeof parsed.goal === "string" ? parsed.goal : "engagement");
+      setAssistLength(typeof parsed.length === "string" ? parsed.length : "medium");
+      setAssistTone(typeof parsed.tone === "string" ? parsed.tone : "clear");
+      setAssistVoice(typeof parsed.voice === "string" ? parsed.voice : "");
+      setAssistOutput(typeof parsed.output === "string" ? parsed.output : "");
+      setAssistHistory(restoredHistory);
+    } catch {
+      window.localStorage.removeItem(ASSIST_MEMORY_STORAGE_KEY);
+    } finally {
+      setAssistMemoryReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!assistMemoryReady) {
+      return;
+    }
+
+    const memory: AssistMemory = {
+      activeAction: activeAssist,
+      audience: assistAudience,
+      brief: assistBrief,
+      goal: assistGoal,
+      length: assistLength,
+      output: assistOutput,
+      outputsByAction: assistHistory,
+      tone: assistTone,
+      voice: assistVoice,
+    };
+
+    window.localStorage.setItem(ASSIST_MEMORY_STORAGE_KEY, JSON.stringify(memory));
+  }, [
+    activeAssist,
+    assistAudience,
+    assistBrief,
+    assistGoal,
+    assistHistory,
+    assistLength,
+    assistMemoryReady,
+    assistOutput,
+    assistTone,
+    assistVoice,
+  ]);
 
   async function copyText(text: string, label: string) {
     await navigator.clipboard.writeText(text);
@@ -383,7 +542,26 @@ export function TextFormatter() {
         throw new Error(data.error || "AI generation failed.");
       }
 
-      setAssistOutput(data.output ?? "");
+      const output = data.output ?? "";
+      const generation: AssistGeneration = {
+        action: activeAssist,
+        createdAt: new Date().toISOString(),
+        id: `${activeAssist}-${Date.now()}`,
+        inputSummary: summarizeAssistInput({
+          audience: assistAudience,
+          brief: assistBrief,
+          currentPost: previewText,
+          goal: assistGoal,
+        }),
+        output,
+        tone: assistTone,
+      };
+
+      setAssistOutput(output);
+      setAssistHistory((currentHistory) => ({
+        ...currentHistory,
+        [activeAssist]: [generation, ...currentHistory[activeAssist].filter((item) => item.output !== output)].slice(0, ASSIST_HISTORY_LIMIT),
+      }));
     } catch (error) {
       setAssistError(error instanceof Error ? error.message : "AI generation failed.");
     } finally {
@@ -425,6 +603,7 @@ export function TextFormatter() {
   const activeAssistAction = assistGroups
     .flatMap((group) => group.actions)
     .find((action) => action.key === activeAssist);
+  const activeAssistHistory = assistHistory[activeAssist] ?? [];
 
   return (
     <div className="formatter-stack">
@@ -606,8 +785,10 @@ export function TextFormatter() {
                             className={activeAssist === action.key ? "assist-action active" : "assist-action"}
                             key={action.key}
                             onClick={() => {
+                              const latestGeneration = assistHistory[action.key][0];
+
                               setActiveAssist(action.key);
-                              setAssistOutput("");
+                              setAssistOutput(latestGeneration?.output ?? "");
                               setAssistError("");
                             }}
                             type="button"
@@ -715,6 +896,30 @@ export function TextFormatter() {
                       </div>
                     )}
                   </div>
+
+                  {activeAssistHistory.length > 0 && (
+                    <div className="assist-history">
+                      <div className="assist-history-heading">
+                        <strong>Recent generations</strong>
+                        <span>{activeAssistHistory.length} saved</span>
+                      </div>
+                      <div className="assist-history-list">
+                        {activeAssistHistory.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => {
+                              setAssistOutput(item.output);
+                              setAssistError("");
+                            }}
+                            type="button"
+                          >
+                            <span>{formatAssistHistoryDate(item.createdAt)}</span>
+                            <small>{item.inputSummary}</small>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="assist-apply-row">
                     <button disabled={!assistOutput || assistLoading} onClick={replaceWithAssistOutput} type="button">
