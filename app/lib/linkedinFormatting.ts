@@ -230,9 +230,9 @@ export function cleanMarkdown(markdown: string) {
     .replace(/_(.*?)_/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/^\s*[-*+]\s+/gm, "• ")
-    .replace(/^\s*\d+[.)]\s+/gm, (_match, offset, source) => {
+    .replace(/^\s*\d+[.)]\s+/gm, (_match: string, offset: number, source: string) => {
       const before = source.slice(0, offset);
-      const lineNumber = before.split("\n").filter((line) => /^\s*\d+[.)]\s+/.test(line)).length + 1;
+      const lineNumber = before.split("\n").filter((line: string) => /^\s*\d+[.)]\s+/.test(line)).length + 1;
       return `${lineNumber}. `;
     })
     .replace(/\n{3,}/g, "\n\n")

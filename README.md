@@ -23,11 +23,12 @@ AI tools often generate posts in Markdown. When that text is pasted into LinkedI
 - Undo, redo, and selected-text cleanup
 - Desktop and mobile LinkedIn-style preview
 - Character, word, line, hashtag, mention, and styled-character checks
-- Optional AI Assist panel for local Ollama or bring-your-own API key providers
 
-## Live Demo
+## Static Demo
 
-[Open LinkedIn Post Studio](https://linkedin-tools.sinisterpuppy.chatgpt.site)
+[Open the GitHub Pages demo](https://403ai.github.io/linkedin-post-studio/)
+
+This branch is designed for frontend-only hosting. It excludes backend AI Assist so the formatter can run on GitHub Pages.
 
 ## Tech Stack
 
@@ -71,7 +72,7 @@ pnpm run lint
 
 ## Project Status
 
-The core formatter and preview workflow are usable. AI Assist exists, but active feature development is currently paused while the repository is prepared for public contribution.
+The static branch contains the public formatter and preview workflow only. AI Assist is intentionally excluded from this branch so it can be hosted as a frontend-only demo.
 
 Good first contribution areas:
 
@@ -79,7 +80,6 @@ Good first contribution areas:
 - Add tests for LinkedIn formatting utilities.
 - Improve documentation and examples.
 - Refine preview accuracy as LinkedIn UI changes.
-- Add more provider-safe AI Assist configuration options.
 
 ## Contributing
 

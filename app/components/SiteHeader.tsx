@@ -9,10 +9,9 @@ export function SiteHeader() {
       </Link>
       <div className="nav-links">
         <Link href="/help">Help</Link>
-        <Link href="/settings">Settings</Link>
       </div>
       <div className="mobile-tool-link">
-        <Link href="/settings">Settings</Link>
+        <Link href="/help">Help</Link>
       </div>
     </nav>
   );

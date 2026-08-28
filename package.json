@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "description": "Copy-ready LinkedIn formatting tools for AI-generated posts.",
-  "homepage": "https://linkedin-tools.sinisterpuppy.chatgpt.site",
+  "homepage": "https://403ai.github.io/linkedin-post-studio/",
   "repository": {
     "type": "git",
     "url": "https://github.com/403ai/linkedin-post-studio.git"
@@ -27,6 +27,7 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
+    "build:github-pages": "GITHUB_PAGES=true next build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
   },

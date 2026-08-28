@@ -16,12 +16,8 @@ This roadmap is intentionally small and practical. The formatter is the core pro
 - More accurate LinkedIn preview behavior as LinkedIn changes
 - Export and import examples
 
-## Assist
+## Static Demo Branch
 
-Assist development is currently paused. Future work may include:
-
-- Action-specific panels
-- Editable prompts
-- Structured output for hooks, hashtags, CTA options, and full posts
-- Provider test harness
-- Better local model recommendations
+- Keep the public hosted demo focused on formatter and preview behavior.
+- Avoid backend-only features in this branch.
+- Keep setup simple for forks and GitHub Pages style hosting.

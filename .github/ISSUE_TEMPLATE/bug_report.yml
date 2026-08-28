@@ -49,8 +49,6 @@ body:
         - Preview
         - Checks
         - Emoji picker
-        - AI Assist
-        - Settings
         - Documentation
         - Other
     validations:

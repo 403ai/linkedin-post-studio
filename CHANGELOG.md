@@ -9,4 +9,3 @@ All notable changes to this project will be documented here.
 - Unicode formatting controls.
 - LinkedIn-style desktop and mobile preview.
 - Post checks for characters, words, lines, hashtags, mentions, and styled text.
-- Optional AI Assist settings and generation workflow.

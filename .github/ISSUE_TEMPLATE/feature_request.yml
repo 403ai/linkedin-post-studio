@@ -27,8 +27,6 @@ body:
         - Formatter
         - Preview
         - Checks
-        - AI Assist
-        - Settings
         - Documentation
         - Public repo/community
         - Other
