@@ -4,10 +4,11 @@ This roadmap is intentionally small and practical. The formatter is the core pro
 
 ## Public Readiness
 
-- Community health files
-- Issue and pull request templates
-- CI checks
-- Clear contribution guidance
+- Keep community health files current
+- Keep issue and pull request templates useful
+- Keep CI checks green
+- Maintain the static GitHub Pages demo
+- Keep contribution guidance clear
 
 ## Formatter
 

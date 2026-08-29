@@ -27,7 +27,8 @@ AI tools often generate posts in Markdown. When that text is pasted into LinkedI
 
 ## Live Demo
 
-[Open LinkedIn Post Studio](https://linkedin-tools.sinisterpuppy.chatgpt.site)
+- [Public GitHub Pages demo](https://403ai.github.io/linkedin-post-studio/) - static formatter and preview build from the `static-no-assist` branch.
+- [Full app preview](https://linkedin-tools.sinisterpuppy.chatgpt.site) - main app build with the experimental Assist workflow.
 
 ## Tech Stack
 
@@ -37,6 +38,7 @@ AI tools often generate posts in Markdown. When that text is pasted into LinkedI
 - TypeScript
 - CSS
 - OpenAI Sites hosting
+- GitHub Pages for the static public demo
 
 ## Getting Started
 
@@ -73,6 +75,8 @@ pnpm run lint
 
 The core formatter and preview workflow are usable. AI Assist exists, but active feature development is currently paused while the repository is prepared for public contribution.
 
+The public GitHub Pages demo intentionally uses the `static-no-assist` branch. That branch removes Assist and Settings so the hosted demo can run as a free static site without collecting API keys or needing server routes.
+
 Good first contribution areas:
 
 - Improve accessibility and keyboard navigation.
@@ -86,6 +90,8 @@ Good first contribution areas:
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
 
 For bugs, feature requests, and documentation changes, use the issue templates in GitHub. For security concerns, please follow [SECURITY.md](SECURITY.md).
+
+For deployment notes, see [docs/deployment.md](docs/deployment.md). For the latest repository security pass, see [docs/security-review.md](docs/security-review.md).
 
 ## License
 

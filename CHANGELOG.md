@@ -10,3 +10,4 @@ All notable changes to this project will be documented here.
 - LinkedIn-style desktop and mobile preview.
 - Post checks for characters, words, lines, hashtags, mentions, and styled text.
 - Optional AI Assist settings and generation workflow.
+- Public static GitHub Pages demo from the `static-no-assist` branch.
